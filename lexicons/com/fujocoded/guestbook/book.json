@@ -1,0 +1,14 @@
+{
+  "lexicon": 1,
+  "id": "com.fujocoded.guestbook.book",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "record-key",
+      "record": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}
