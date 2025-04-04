@@ -66,3 +66,11 @@ APP_PASSWORD=your_password
 
 Right now, you can't (unless you want to implement the whole thing from scratch)!
 Come to the streams and stay tuned for more functionality around this.
+
+## ⚠️⚠️⚠️ DANGER: Deleting Everything ⚠️⚠️⚠️
+
+Experimented too much and hate leaving a mess around? Delete everything with
+`npm run guestbook:dangerously-delete-everything`, which will (again) DELETE EVERYTHING.
+
+If you want to be more targeted, you can modify `client/delete-everything.ts`.
+Good luck!
