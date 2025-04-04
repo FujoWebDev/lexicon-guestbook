@@ -14,6 +14,8 @@ const guestbookAgent = new AtpBaseClient(agent.fetchHandler);
 const createReult = await guestbookAgent.com.fujocoded.guestbook.book.create(
   {
     repo: "essentialrandom.bsky.social",
+    // This is the name of the "file" that will contain your guestbook data
+    // within the 'com.fujocoded.guestbook.book' collection.
     rkey: "emotional-support",
   },
   {
