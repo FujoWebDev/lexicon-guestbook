@@ -16,9 +16,13 @@ Right now, this is mostly a sample and teaching repo. You can watch us build
 this live (or recorded) by [following Ms Boba on
 Twitch](https://www.twitch.tv/essentialrandomness).
 
+---
+
 ⊹₊ ˚‧︵‿₊୨ ᰔ ୧₊‿︵‧ ˚ ₊⊹ <br />
 [Support FujoCoded on Patreon for More of This™!](https://www.patreon.com/fujocoded) <br />
 ⊹₊ ˚‧︵‿₊୨ ᰔ ୧₊‿︵‧ ˚ ₊⊹
+
+---
 
 ## Using the Client
 
