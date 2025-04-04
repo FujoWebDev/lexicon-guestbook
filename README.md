@@ -16,6 +16,8 @@ Right now, this is mostly a sample and teaching repo. You can watch us build
 this live (or recorded) by [following Ms Boba on
 Twitch](https://www.twitch.tv/essentialrandomness).
 
+[Support FujoCoded on Patreon for More of This™!](https://www.patreon.com/fujocoded)
+
 ## Using the Client
 
 ### 1. Generate the Lexicon API
@@ -42,15 +44,17 @@ APP_PASSWORD=your_password
 
 ### 2. Create your Guestbook
 
-Open `client/create-guestbook.ts` and change things around to your desired data.
+> Remember: you need to `npm install` the dependencies first!
 
-TODO: write how to run it
+1. Open `client/create-guestbook.ts` and change things around to your desired data.
+2. <u>ENTER THE CLIENT DIRECTORY</u> (`cd client`)
+3. Run `npm run guestbook:create`
 
 ### 3. Post a Submission to your Guestbok (or Someone Else's)
 
-Open `client/create-submission.ts` and change things around to your desired data.
-
-TODO: write how to run it
+1. Open `client/create-submission.ts` and change things around to your desired data.
+2. <u>ENTER THE CLIENT DIRECTORY</u> (`cd client`)
+3. Run `npm run guestbook:submit`
 
 ## Putting your Guestbook on your Website
 

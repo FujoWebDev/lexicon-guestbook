@@ -1,5 +1,6 @@
 import { BskyAgent } from "@atproto/api";
 import { AtpBaseClient } from "./generated/api/index.js";
+import "dotenv/config";
 
 const agent = new BskyAgent({ service: "https://bsky.social" });
 await agent.login({
