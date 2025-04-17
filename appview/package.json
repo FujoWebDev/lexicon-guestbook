@@ -1,0 +1,24 @@
+{
+  "name": "guestbook-appview",
+  "version": "0.0.1",
+  "description": "an appview for an atproto guestbook",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx ./index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "dependencies": {
+    "@atproto/api": "^0.14.19",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/ws": "^8.18.1"
+  }
+}
