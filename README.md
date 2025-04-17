@@ -62,6 +62,9 @@ APP_PASSWORD=your_password
 2. <u>ENTER THE CLIENT DIRECTORY</u> (`cd client`)
 3. Run `npm run guestbook:submit`
 
+You can see all the submissions as they happen with the following code:
+`websocat wss://jetstream2.us-east.bsky.network/subscribe\?wantedCollections=com.fujocoded.guestbook.submission | jq 'select(.kind == "commit")'`
+
 ## Putting your Guestbook on your Website
 
 Right now, you can't (unless you want to implement the whole thing from scratch)!
