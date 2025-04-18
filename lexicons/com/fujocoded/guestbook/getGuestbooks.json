@@ -1,0 +1,36 @@
+{
+  "lexicon": 1,
+  "id": "com.fujocoded.guestbook.getGuestbooks",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "Get a list of guestbooks owned by a DID",
+      "parameters": {
+        "type": "params",
+        "required": ["ownerDid"],
+        "properties": {
+          "ownerDid": {
+            "type": "string",
+            "format": "did"
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["guestbooks"],
+          "properties": {
+            "guestbooks": {
+              "type": "array",
+              "items": {
+                "type": "ref",
+                "ref": "com.fujocoded.guestbook.defs#guestbookView"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

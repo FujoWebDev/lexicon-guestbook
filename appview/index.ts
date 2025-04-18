@@ -37,6 +37,8 @@ JETSTREAM_URL.searchParams.set(
   "com.fujocoded.guestbook.*"
 );
 
+// We are putting these in maps because we TEMPORARILY hate ourselves
+// TODO: put these in a database
 const GUESTBOOKS = new Map<string /*owner did*/, (Book & { id: string })[]>();
 const SUBMISSIONS = new Map<
   string /*atproto uri*/,
