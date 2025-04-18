@@ -1,5 +1,5 @@
 {
-  "lexicon": "1",
+  "lexicon": 1,
   "id": "com.fujocoded.guestbook.defs",
   "defs": {
     "guestbookView": {
@@ -7,6 +7,10 @@
       "required": ["uri", "owner"],
       "properties": {
         "uri": { "type": "string", "format": "at-uri" },
+        "owner": {
+          "type": "ref",
+          "ref": "#profileView"
+        },
         "title": {
           "type": "string",
           "minLength": 1,
@@ -18,7 +22,10 @@
         }
       }
     },
-    "submissionView": {},
+    "submissionView": {
+      "type": "object",
+      "properties": {}
+    },
     "profileView": {
       "type": "object",
       "required": ["did"],
