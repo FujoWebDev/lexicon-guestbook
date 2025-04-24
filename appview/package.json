@@ -12,13 +12,16 @@
   "license": "MIT",
   "dependencies": {
     "@atproto/api": "^0.14.19",
-    "dotenv": "^16.4.7",
-    "tsx": "^4.19.3",
+    "@libsql/client": "^0.15.4",
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.43.0",
     "typescript": "^5.8.2",
     "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.1",
+    "drizzle-kit": "^0.31.0",
+    "tsx": "^4.19.3"
   }
 }
