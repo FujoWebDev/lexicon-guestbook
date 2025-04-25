@@ -7,26 +7,39 @@ import {
   type Record as Submission,
   isRecord as isSubmission,
 } from "../client/generated/api/types/com/fujocoded/guestbook/submission.js";
+import { z } from "zod";
+import { handleBookEvent } from "./lib/book.js";
+import { handleSubmissionEvent } from "./lib/submission.js";
 
-type CommitEvent<T> = {
-  did: string;
-  kind: "commit";
-  commit:
-    | {
-        operation: "create" | "update";
-        record: T;
-        rev: string;
-        collection: string;
-        rkey: string;
-        cid: string;
-      }
-    | {
-        operation: "delete";
-        rev: string;
-        collection: string;
-        rkey: string;
-      };
-};
+const CommitEventSchema = z.object({
+  did: z.string(),
+  kind: z.literal("commit"),
+  commit: z.union([
+    z.object({
+      operation: z.enum(["create", "update"]),
+      record: z
+        .object({
+          $type: z.string(),
+        })
+        .passthrough(),
+      rev: z.string(),
+      collection: z.string(),
+      rkey: z.string(),
+      cid: z.string(),
+    }),
+    z.object({
+      operation: z.enum(["delete"]),
+      rev: z.string(),
+      collection: z.string(),
+      rkey: z.string(),
+    }),
+  ]),
+});
+type CommitEvent = z.infer<typeof CommitEventSchema>;
+
+const isBookRecord = (record: unknown): record is Book => isBook(record);
+const isSubmissionRecord = (record: unknown): record is Submission =>
+  isSubmission(record);
 
 const JETSTREAM_URL = new URL(
   "subscribe",
@@ -37,85 +50,66 @@ JETSTREAM_URL.searchParams.set(
   "com.fujocoded.guestbook.*"
 );
 
-// We are putting these in maps because we TEMPORARILY hate ourselves
-// TODO: put these in a database
-const GUESTBOOKS = new Map<string /*owner did*/, (Book & { id: string })[]>();
-const SUBMISSIONS = new Map<
-  string /*atproto uri*/,
-  (Submission & { id: string; author: string })[]
->();
-
 const ws = new WebSocket(JETSTREAM_URL);
 
 ws.on("open", () => {
   console.log("Starting to listen");
-  console.log("Tell me all your secrets *glomps u*");
+  console.log("Ready to glomp your commits *glomps u too*");
 });
 
 ws.on("message", async (data) => {
-  const eventData: CommitEvent<unknown> = JSON.parse(data.toString());
-  if (
-    eventData.kind !== "commit" ||
-    !eventData.commit.collection.startsWith("com.fujocoded.guestbook")
-  ) {
+  const rawEventData = JSON.parse(data.toString());
+  if (rawEventData.kind !== "commit") {
+    return;
+  }
+  const eventData = CommitEventSchema.parse(rawEventData);
+
+  if (!eventData.commit.collection.startsWith("com.fujocoded.guestbook")) {
+    console.error(`Unexpected collection type ${eventData.commit.collection}`);
     return;
   }
 
   console.log("Received event:");
   console.dir(eventData, { depth: null });
 
-  // @ts-expect-error
-  if (isBook(eventData.commit["record"])) {
-    const bookEvent = eventData as CommitEvent<Book>;
-    const owner = bookEvent.did;
-    const previousData = GUESTBOOKS.get(owner) ?? [];
-    console.log(
-      `Received book event ${bookEvent.commit.operation} for key ${bookEvent.commit.rkey}`
-    );
-    if (bookEvent.commit.operation == "create") {
-      GUESTBOOKS.set(owner, [
-        ...previousData,
-        { id: bookEvent.commit.rkey, ...bookEvent.commit.record },
-      ]);
-    }
-    // TODO: Do this right
-    if (bookEvent.commit.operation == "delete") {
-      GUESTBOOKS.set(
-        owner,
-        previousData.filter((book) => book.id !== bookEvent.commit.rkey)
-      );
-    }
+  if (eventData.commit.operation == "delete") {
+    // TODO: handle deleting things
+    console.log("Delete operation:");
+    console.dir(eventData, { depth: null });
+    return;
   }
 
-  // TODO: check type of operation before figuring out type
-  // @ts-expect-error
-  if (isSubmission(eventData.commit["record"])) {
-    const submissionEvent = eventData as CommitEvent<Submission>;
-    console.log(
-      `Received submission event ${submissionEvent.commit.operation} for key ${submissionEvent.commit.rkey}`
+  if (isBookRecord(eventData.commit.record)) {
+    await handleBookEvent(
+      {
+        recordKey: eventData.commit.rkey,
+        book: eventData.commit.record,
+        author: eventData.did,
+      },
+      eventData.commit.operation
     );
-    // We're only handling create because we really should do this with a database if we want to be fancier
-    if (submissionEvent.commit.operation == "create") {
-      const guestbookUri = submissionEvent.commit.record.postedTo;
-      const previousData = SUBMISSIONS.get(guestbookUri) ?? [];
-      SUBMISSIONS.set(guestbookUri, [
-        ...previousData,
-        {
-          id: submissionEvent.commit.rkey,
-          author: submissionEvent.did,
-          ...submissionEvent.commit.record,
-        },
-      ]);
-    }
-    // TODO: Do this right
-    if (submissionEvent.commit.operation == "delete") {
-    }
+    console.log(
+      `${eventData.commit.operation}d book: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+    );
+    return;
   }
 
-  console.log("Current guestbooks");
-  console.dir(GUESTBOOKS, { depth: null });
-  console.log("Current entries");
-  console.dir(SUBMISSIONS, { depth: null });
+  if (isSubmissionRecord(eventData.commit.record)) {
+    await handleSubmissionEvent(
+      {
+        recordKey: eventData.commit.rkey,
+        submission: eventData.commit.record,
+        author: eventData.did,
+      },
+      eventData.commit.operation
+    );
+    console.log(
+      `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+    );
+    return;
+  }
+
+  console.error(`Unknown record type: ${eventData.commit.record.$type}`);
 });
 
 ws.on("error", (err) => {

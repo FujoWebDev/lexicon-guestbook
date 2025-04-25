@@ -1,9 +1,13 @@
-import { int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { index, int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
-export const users = sqliteTable("user", {
-  id: int().primaryKey({ autoIncrement: true }),
-  did: text().notNull().unique(),
-});
+export const users = sqliteTable(
+  "user",
+  {
+    id: int().primaryKey({ autoIncrement: true }),
+    did: text().notNull().unique(),
+  },
+  (t) => [index("users_did").on(t.did)]
+);
 
 export const guestbooks = sqliteTable(
   "guestbooks",
