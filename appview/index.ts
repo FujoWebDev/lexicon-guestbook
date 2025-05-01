@@ -3,6 +3,10 @@ import { createServer } from "../client/generated/server/index.js";
 import { getGuestbooksByUser } from "./lib/book.js";
 import { getSubmissionByGuestbook } from "./lib/submission.js";
 import { OutputSchema as GuestbookOutput } from "../client/generated/server/types/com/fujocoded/guestbook/getGuestbooks.js";
+import { readFileSync } from "node:fs";
+
+const pubKey = readFileSync("./public_key.pem", "utf-8");
+const PORT = process.env.PORT ?? "3000";
 
 const app = express();
 let server = createServer({
@@ -13,6 +17,33 @@ let server = createServer({
     // no blobs
     blobLimit: 0,
   },
+});
+
+const DOMAIN = "worktop.tail2ad46.ts.net";
+app.get("/.well-known/did.json", (_, res) => {
+  res.json({
+    "@context": [
+      "https://www.w3.org/ns/did/v1",
+      "https://w3id.org/security/multikey/v1",
+      "https://w3id.org/security/suites/secp256k1-2019/v1",
+    ],
+    id: "did:web:" + DOMAIN,
+    verificationMethod: [
+      {
+        id: "did:web:" + DOMAIN + "#atproto",
+        type: "Multikey",
+        controller: "did:web:" + DOMAIN,
+        publicKeyMultibase: pubKey,
+      },
+    ],
+    service: [
+      {
+        id: "#guestbook_appview",
+        type: "GuestbookAppView",
+        serviceEndpoint: "https://" + DOMAIN,
+      },
+    ],
+  });
 });
 
 server.com.fujocoded.guestbook.getGuestbooks({
@@ -47,6 +78,6 @@ server.com.fujocoded.guestbook.getGuestbooks({
 });
 
 app.use(server.xrpc.router);
-app.listen(3000, () => {
-  console.log("listening");
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });

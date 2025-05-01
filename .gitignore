@@ -2,3 +2,4 @@ generated/
 node_modules/
 .env
 appview.db
+private_key.pem

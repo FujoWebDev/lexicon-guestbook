@@ -65,6 +65,16 @@ APP_PASSWORD=your_password
 You can see all the submissions as they happen with the following code:
 `websocat wss://jetstream2.us-east.bsky.network/subscribe\?wantedCollections=com.fujocoded.guestbook.submission | jq 'select(.kind == "commit")'`
 
+## Get an AppView Up
+
+TODO: write how to get the appview working
+
+### Generate a public/private key pair
+
+1. Enter the AppView directory with `cd appview/`
+2. Generate the private key: `openssl ecparam -name secp256k1 -genkey -noout -out private_key.pem`
+3. Generate the public key: `openssl ec -in private_key.pem -pubout -out public_key.pem`
+
 ## Putting your Guestbook on your Website
 
 Right now, you can't (unless you want to implement the whole thing from scratch)!

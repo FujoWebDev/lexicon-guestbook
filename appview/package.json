@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx ./index.ts",
-    "ingester:dev": "tsx ./ingester.ts",
+    "dev:ingester": "tsx ./ingester.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "FujoCoded LLC",
