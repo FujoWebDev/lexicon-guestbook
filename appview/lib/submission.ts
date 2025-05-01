@@ -1,4 +1,4 @@
-import { and, eq, param } from "drizzle-orm";
+import { and, eq, getTableColumns, param } from "drizzle-orm";
 import { type Record as Submission } from "../../client/generated/api/types/com/fujocoded/guestbook/submission.js";
 import { db } from "../db/index.js";
 import { guestbooks, submissions, users } from "../db/schema.js";
@@ -45,4 +45,30 @@ export const handleSubmissionEvent = async (
     author: userId.id,
     record: JSON.stringify(params.submission),
   });
+};
+
+export const getSubmissionByGuestbook = async ({
+  guestbookKey,
+  collectionType,
+  ownerDid,
+}: {
+  guestbookKey: string;
+  collectionType: string;
+  ownerDid: string;
+}) => {
+  return await db
+    .select({
+      ...getTableColumns(submissions),
+    })
+    .from(submissions)
+    .innerJoin(users, eq(users.id, submissions.id))
+    .innerJoin(guestbooks, eq(guestbooks.id, submissions.postedTo))
+    .where(
+      and(
+        eq(guestbooks.recordKey, guestbookKey),
+        eq(guestbooks.collection, collectionType),
+        eq(users.did, ownerDid)
+      )
+    )
+    .execute();
 };
