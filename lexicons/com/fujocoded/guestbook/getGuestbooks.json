@@ -25,7 +25,7 @@
               "type": "array",
               "items": {
                 "type": "ref",
-                "ref": "com.fujocoded.guestbook.defs#guestbookView"
+                "ref": "com.fujocoded.guestbook.defs#guestbookSummaryView"
               }
             }
           }

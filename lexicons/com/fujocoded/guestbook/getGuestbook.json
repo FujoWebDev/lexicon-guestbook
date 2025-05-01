@@ -1,0 +1,27 @@
+{
+  "lexicon": 1,
+  "id": "com.fujocoded.guestbook.getGuestbook",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "Get a list of the entries in a guestbook",
+      "parameters": {
+        "type": "params",
+        "required": ["guestbookAtUri"],
+        "properties": {
+          "guestbookAtUri": {
+            "type": "string",
+            "format": "at-uri"
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "ref",
+          "ref": "com.fujocoded.guestbook.defs#guestbookView"
+        }
+      }
+    }
+  }
+}

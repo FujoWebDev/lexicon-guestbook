@@ -2,11 +2,11 @@
   "lexicon": 1,
   "id": "com.fujocoded.guestbook.defs",
   "defs": {
-    "guestbookView": {
+    "guestbookSummaryView": {
       "type": "object",
-      "required": ["uri", "owner"],
+      "required": ["atUri", "owner"],
       "properties": {
-        "uri": { "type": "string", "format": "at-uri" },
+        "atUri": { "type": "string", "format": "at-uri" },
         "owner": {
           "type": "ref",
           "ref": "#profileView"
@@ -22,9 +22,50 @@
         }
       }
     },
+    "guestbookView": {
+      "type": "object",
+      "required": ["atUri", "owner", "submissions"],
+      "properties": {
+        "atUri": { "type": "string", "format": "at-uri" },
+        "owner": {
+          "type": "ref",
+          "ref": "#profileView"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8096000,
+          "maxGraphemes": 4096000
+        },
+        "submissions": {
+          "type": "array",
+          "items": {
+            "type": "ref",
+            "ref": "#submissionView"
+          }
+        }
+      }
+    },
     "submissionView": {
       "type": "object",
-      "properties": {}
+      "required": ["atUri", "author", "createdAt"],
+      "properties": {
+        "atUri": { "type": "string", "format": "at-uri" },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8096000,
+          "maxGraphemes": 4096000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "datetime"
+        },
+        "author": {
+          "type": "ref",
+          "ref": "#profileView"
+        }
+      }
     },
     "profileView": {
       "type": "object",

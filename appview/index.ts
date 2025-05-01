@@ -59,7 +59,7 @@ server.com.fujocoded.guestbook.getGuestbooks({
         });
 
         return {
-          uri: `at://${guestbook.ownerDid}/${guestbook.collection}/${guestbook.recordKey}`,
+          atUri: `at://${guestbook.ownerDid}/${guestbook.collection}/${guestbook.recordKey}`,
           owner: {
             did: guestbook.ownerDid,
           },

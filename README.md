@@ -67,6 +67,14 @@ You can see all the submissions as they happen with the following code:
 
 ## Get an AppView Up
 
+### Generate the AppView Server definitions
+
+```bash
+npx @atproto/lex-cli gen-server ./client/generated/server ./lexicons/**/*.json
+```
+
+TODO: move these to the appview folder
+
 TODO: write how to get the appview working
 
 ### Generate a public/private key pair
