@@ -1,9 +1,10 @@
 import express from "express";
 import { createServer } from "../client/generated/server/index.js";
-import { getGuestbooksByUser } from "./lib/book.js";
+import { getGuestbook, getGuestbooksByUser } from "./lib/book.js";
 import { getSubmissionByGuestbook } from "./lib/submission.js";
 import { OutputSchema as GuestbookOutput } from "../client/generated/server/types/com/fujocoded/guestbook/getGuestbooks.js";
 import { readFileSync } from "node:fs";
+import { get } from "node:http";
 
 const pubKey = readFileSync("./public_key.pem", "utf-8");
 const PORT = process.env.PORT ?? "3000";
@@ -44,6 +45,28 @@ app.get("/.well-known/did.json", (_, res) => {
       },
     ],
   });
+});
+
+server.com.fujocoded.guestbook.getGuestbook({
+  handler: async ({ params }) => {
+    const [guestbookKey, _collectionType, ownerDid] = params.guestbookAtUri
+      .split("/")
+      .toReversed();
+    const guestbookData = await getGuestbook({
+      guestbookKey,
+      ownerDid,
+    });
+
+    console.dir(guestbookData, { depth: null });
+
+    return {
+      atUri: params.guestbookAtUri,
+      owner: {
+        // did: guestbook.ownerDid,
+      },
+      submissions: [],
+    };
+  },
 });
 
 server.com.fujocoded.guestbook.getGuestbooks({
