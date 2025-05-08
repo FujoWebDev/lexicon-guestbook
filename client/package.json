@@ -7,6 +7,7 @@
   "scripts": {
     "guestbook:create": "tsx ./create-guestbook.ts",
     "guestbook:submit": "tsx ./create-submission.ts",
+    "guestbook:view": "tsx ./get-guestbook.ts",
     "guestbook:dangerously-delete-everything": "tsx ./delete-everything.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

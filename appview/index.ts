@@ -57,14 +57,14 @@ server.com.fujocoded.guestbook.getGuestbook({
       ownerDid,
     });
 
-    console.dir(guestbookData, { depth: null });
+    const guestbookResponse = {
+      atUri: params.guestbookAtUri,
+      ...guestbookData,
+    };
 
     return {
-      atUri: params.guestbookAtUri,
-      owner: {
-        // did: guestbook.ownerDid,
-      },
-      submissions: [],
+      encoding: "application/json",
+      body: guestbookResponse,
     };
   },
 });

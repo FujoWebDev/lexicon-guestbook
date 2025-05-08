@@ -13,14 +13,19 @@ await agent.login({
 console.log(agent.did);
 
 const guestbookAgent = new AtpBaseClient(agent.fetchHandler);
+// TODO: check how to turn on logging for invalid responses
 guestbookAgent.setHeader(
   "atproto-proxy",
   `${GUESTBOOK_APPVIEW_DID}#guestbook_appview`
 );
 
 console.dir(
-  await guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
-    ownerDid: agent.did!,
-  }),
+  await guestbookAgent.com.fujocoded.guestbook.getGuestbook(
+    {
+      guestbookAtUri:
+        "at://did:plc:r2vpg2iszskbkegoldmqa322/com.fujocoded.guestbook.book/emotional-support",
+    },
+    {}
+  ),
   { depth: null }
 );
