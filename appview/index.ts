@@ -47,6 +47,33 @@ app.get("/.well-known/did.json", (_, res) => {
   });
 });
 
+app.get("/guestbook/:ownerDid/:collection/:guestbookKey/", async (req, res) => {
+  const { ownerDid, guestbookKey } = req.params;
+
+  const guestbookData = await getGuestbook({
+    guestbookKey,
+    ownerDid,
+  });
+
+  res.send(
+    `
+<html>
+<body>
+   ${!!guestbookData?.title && `<h1>${guestbookData?.title}</h1>`}
+   <div class="submissions">
+      ${guestbookData?.submissions
+        .map(
+          (submission) =>
+            `<article><p><span class="author">${submission.author.did}</span> says: <span class="text">${submission.text}</span></p><datetime>${submission.createdAt}</datetime></article>`
+        )
+        .join("\n")}
+   </div>
+</body>
+</html>
+`
+  );
+});
+
 server.com.fujocoded.guestbook.getGuestbook({
   handler: async ({ params }) => {
     const [guestbookKey, _collectionType, ownerDid] = params.guestbookAtUri

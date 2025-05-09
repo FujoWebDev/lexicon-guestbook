@@ -95,3 +95,39 @@ Experimented too much and hate leaving a mess around? Delete everything with
 
 If you want to be more targeted, you can modify `client/delete-everything.ts`.
 Good luck!
+
+## TODO-list!
+
+- [ ] Get someone else to write in the lexicon!
+- [ ] Display other lexicons
+
+### Lexicon
+
+- [ ] Allow guestbooks moderation (e.g. delete entry)
+- [ ] Allow blocking users
+- [ ] Allow restricting which URLs a guestbook is displayable on
+
+### AppView
+
+- [ ] Return handles of users
+- [ ] Accept guestbook submissions from HTML
+- [ ] Improve HTML generation
+- [ ] Check out CORS
+- [ ] Allow creating guestbooks
+
+### Client
+
+- [ ] Get rid of app passwords
+
+#### HTML iframe
+
+- [ ] Allow submission via form
+
+#### Others
+
+- [ ] Create Astro plugin
+- [ ] Create guestbook webcomponent(?)
+
+### Ingestor
+
+- [ ] Catch up with cursor
