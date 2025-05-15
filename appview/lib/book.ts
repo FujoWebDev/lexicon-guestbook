@@ -1,7 +1,8 @@
+import { alias } from "drizzle-orm/sqlite-core";
 import { type Record as Book } from "../../client/generated/api/types/com/fujocoded/guestbook/book.js";
 import { db } from "../db/index.js";
 import { guestbooks, submissions, users } from "../db/schema.js";
-import { eq, getTableColumns, and, sql, aliasedTable } from "drizzle-orm";
+import { eq, getTableColumns, and } from "drizzle-orm";
 
 export const handleBookEvent = async (
   params: { book: Book; author: string; recordKey: string },
@@ -48,7 +49,7 @@ export const getGuestbook = async ({
   guestbookKey: string;
   ownerDid: string;
 }) => {
-  const authors = aliasedTable(users, "authors");
+  const authors = alias(users, "authors");
   const guestbookEntries = await db
     .select({
       ...getTableColumns(guestbooks),
@@ -64,7 +65,7 @@ export const getGuestbook = async ({
       and(eq(guestbooks.recordKey, guestbookKey), eq(users.did, ownerDid))
     );
 
-  if (!guestbookEntries[0]) {
+  if (!guestbookEntries) {
     return null;
   }
 
@@ -73,13 +74,14 @@ export const getGuestbook = async ({
     owner: {
       did: guestbookEntries[0].ownerDid,
     },
-    submissions: guestbookEntries.map((entry) => ({
-      atUri: `at://${entry.submissionAuthor?.did}/${entry.submissions.collection}/${entry.submissions.recordKey}`,
-      author: {
-        did: entry.submissionAuthor?.did,
-      },
-      text: entry.submissions?.text,
-      createdAt: entry.submissions?.createdAt.toISOString(),
-    })),
+    submissions:
+      guestbookEntries.map((entry) => ({
+        atUri: `at://${entry.submissionAuthor?.did}/${entry.submissions?.collection}/${entry.submissions?.recordKey}`,
+        author: {
+          did: entry.submissionAuthor?.did,
+        },
+        text: entry.submissions?.text,
+        createdAt: entry.submissions?.createdAt.toISOString(),
+      })) || [],
   };
 };
