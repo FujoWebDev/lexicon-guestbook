@@ -9,6 +9,7 @@ import { createRoutes } from "./routes/auth.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
+import { handler as ssrHandler } from "./site/dist/server/entry.mjs";
 
 import {
   deleteSessionTokenCookie,
@@ -191,6 +192,9 @@ server.com.fujocoded.guestbook.getGuestbooks({
 });
 
 createRoutes(app);
+
+app.use("/", express.static("site/dist/client/"));
+app.use(ssrHandler);
 
 app.use(server.xrpc.router);
 app.listen(PORT, () => {
