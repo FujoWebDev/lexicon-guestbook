@@ -73,15 +73,31 @@ You can see all the submissions as they happen with the following code:
 npx @atproto/lex-cli gen-server ./client/generated/server ./lexicons/**/*.json
 ```
 
-TODO: move these to the appview folder
-
-TODO: write how to get the appview working
-
 ### Generate a public/private key pair
 
 1. Enter the AppView directory with `cd appview/`
 2. Generate the private key: `openssl ecparam -name secp256k1 -genkey -noout -out private_key.pem`
 3. Generate the public key: `openssl ec -in private_key.pem -pubout -out public_key.pem`
+
+### Bring the ingester up
+
+TODO
+
+### Bring the AppView server up
+
+1. Enter the appview directory `cd appview/`
+2. Run `npm run dev` to start serving the AppView
+
+### Make the AppView server publicly available
+
+To make the AppView work, it needs to be reachable from the external internet at a specific address.
+If you have tailscale, you can use serve/funnel to create this address.
+
+1. Run `tailscale serve https / http://localhost:3003/`
+2. Run `tailscale funnel 443 on`
+3. Run `tailscale serve status` and use the address from the funnel
+
+TODO: explain how to configure this addresss
 
 ## Putting your Guestbook on your Website
 
@@ -98,7 +114,7 @@ Good luck!
 
 ## TODO-list!
 
-- [ ] Get someone else to write in the lexicon!
+- [x] Get someone else to write in the lexicon!
 - [ ] Display other lexicons
 
 ### Lexicon
