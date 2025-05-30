@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check": "astro check",
     "preview": "astro preview"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/node": "^9.2.2",
-    "astro": "^5.8.1"
+    "astro": "^5.8.1",
+    "typescript": "^5.8.3"
   }
 }

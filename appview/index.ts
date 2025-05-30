@@ -68,22 +68,6 @@ app.get("/.well-known/did.json", (_, res) => {
   });
 });
 
-// app.get("/guestbook/:ownerDid/:collection/:guestbookKey/", async (req, res) => {
-
-//   const loggedInClient = await getLoggedInClient(req, res);
-
-//   const guestbookData = await getGuestbook({
-//     guestbookKey,
-//     ownerDid,
-//   });
-
-//   res.send(
-//     `
-
-// `
-//   );
-// });
-
 app.post(
   "/guestbook/:ownerDid/:collection/:guestbookKey/",
   async (req, res) => {
@@ -175,7 +159,22 @@ server.com.fujocoded.guestbook.getGuestbooks({
 createRoutes(app);
 
 app.use("/", express.static("site/dist/client/"));
-app.use(ssrHandler);
+app.use(async (req, res, next) => {
+  const loggedInClient = await getLoggedInClient(req, res);
+  const guestbookAgent = loggedInClient
+    ? new AtpBaseClient(loggedInClient!.fetchHandler.bind(loggedInClient))
+    : null;
+  guestbookAgent?.setHeader(
+    "atproto-proxy",
+    `did:web:${DOMAIN}#guestbook_appview`
+  );
+  const locals = {
+    loggedInClient,
+    guestbookAgent,
+  };
+
+  ssrHandler(req, res, next, locals);
+});
 
 app.use(server.xrpc.router);
 app.listen(PORT, () => {

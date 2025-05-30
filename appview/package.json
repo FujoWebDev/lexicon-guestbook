@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx ./index.ts",
+    "dev": "tsx watch ./index.ts",
     "dev:ingester": "tsx ./ingester.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
