@@ -6,7 +6,6 @@ import { getSubmissionByGuestbook } from "./lib/submission.js";
 import { OutputSchema as GuestbookOutput } from "../client/generated/server/types/com/fujocoded/guestbook/getGuestbooks.js";
 import { readFileSync } from "node:fs";
 import { createRoutes } from "./routes/auth.js";
-import cors from "cors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import { handler as ssrHandler } from "./site/dist/server/entry.mjs";
@@ -18,12 +17,7 @@ const PORT = process.env.PORT ?? "3003";
 
 const app = express();
 app.use(cookieParser());
-app.use(bodyParser.urlencoded());
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+app.use(bodyParser.json());
 
 let server = createServer({
   validateResponse: false,
@@ -35,7 +29,7 @@ let server = createServer({
   },
 });
 
-const DOMAIN = "worktop.tail2ad46.ts.net";
+const APPVIEW_DOMAIN = "worktop.tail2ad46.ts.net";
 app.get("/.well-known/did.json", (_, res) => {
   res.json({
     "@context": [
@@ -43,12 +37,12 @@ app.get("/.well-known/did.json", (_, res) => {
       "https://w3id.org/security/multikey/v1",
       "https://w3id.org/security/suites/secp256k1-2019/v1",
     ],
-    id: "did:web:" + DOMAIN,
+    id: "did:web:" + APPVIEW_DOMAIN,
     verificationMethod: [
       {
-        id: "did:web:" + DOMAIN + "#atproto",
+        id: "did:web:" + APPVIEW_DOMAIN + "#atproto",
         type: "Multikey",
-        controller: "did:web:" + DOMAIN,
+        controller: "did:web:" + APPVIEW_DOMAIN,
         publicKeyMultibase: pubKey,
       },
     ],
@@ -56,7 +50,7 @@ app.get("/.well-known/did.json", (_, res) => {
       {
         id: "#guestbook_appview",
         type: "GuestbookAppView",
-        serviceEndpoint: "https://" + DOMAIN,
+        serviceEndpoint: "https://" + APPVIEW_DOMAIN,
       },
     ],
   });
@@ -119,14 +113,22 @@ createRoutes(app);
 
 app.use("/", express.static("site/dist/client/"));
 app.use(async (req, res, next) => {
+  if (req.url.startsWith("/xrpc")) {
+    return next();
+  }
+
   const loggedInClient = await getLoggedInClient(req, res);
-  const guestbookAgent = loggedInClient
-    ? new AtpBaseClient(loggedInClient!.fetchHandler.bind(loggedInClient))
-    : null;
-  guestbookAgent?.setHeader(
-    "atproto-proxy",
-    `did:web:${DOMAIN}#guestbook_appview`
+  const guestbookAgent = new AtpBaseClient(
+    loggedInClient
+      ? loggedInClient.fetchHandler.bind(loggedInClient)
+      : { service: `https://${APPVIEW_DOMAIN}` }
   );
+  if (loggedInClient) {
+    guestbookAgent?.setHeader(
+      "atproto-proxy",
+      `did:web:${APPVIEW_DOMAIN}#guestbook_appview`
+    );
+  }
   const locals = {
     loggedInClient,
     guestbookAgent,

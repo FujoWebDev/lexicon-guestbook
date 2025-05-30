@@ -13,8 +13,8 @@ if (!guestbookResponse.success) {
   throw new Error("Problem with the guestbook");
 }
 
-const result = Astro.getActionResult(actions.postToGuestbook);
 const guestbookData = guestbookResponse.data;
+const result = Astro.getActionResult(actions.postToGuestbook);
 ---
 
 <html>
@@ -34,18 +34,22 @@ const guestbookData = guestbookResponse.data;
           </article>
         ))
       }
-      <form method="POST" action={actions.postToGuestbook}>
-        <input name="text" type="text" placeholder="your text" />
-        <input
-          name="postedTo"
-          value={guestbookAtUri.toString()}
-          type="hidden"
-        />
+      {
+        Astro.locals.loggedInClient && (
+          <form method="POST" action={actions.postToGuestbook}>
+            <input name="text" type="text" placeholder="your text" />
+            <input
+              name="postedTo"
+              value={guestbookAtUri.toString()}
+              type="hidden"
+            />
 
-        <button type="submit">Submit</button>
-        {result?.error && <p class="error">{result.error.message}</p>}
-        {result?.data && <div>{result.data}</div>}
-      </form>
+            <button type="submit">Submit</button>
+            {result?.error && <p class="error">{result.error.message}</p>}
+            {result?.data && <div>{result.data}</div>}
+          </form>
+        )
+      }
     </div>
   </body>
 </html>
