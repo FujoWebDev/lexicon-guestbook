@@ -17,6 +17,8 @@ const PORT = process.env.PORT ?? "3003";
 
 const app = express();
 app.use(cookieParser());
+// Make sure that this bodyParser is json or it will cause problems with the
+// handling of the Astro actions
 app.use(bodyParser.json());
 
 let server = createServer({
