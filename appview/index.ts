@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Response } from "express";
 import { createServer } from "../client/generated/server/index.js";
 import { AtpBaseClient } from "../client/generated/api/index.js";
 import { getGuestbook, getGuestbooksByUser } from "./lib/book.js";
@@ -65,6 +65,13 @@ server.com.fujocoded.guestbook.getGuestbook({
       guestbookKey,
       ownerDid,
     });
+
+    if (!guestbookData) {
+      return {
+        status: 404,
+        message: "Guestbook not found",
+      };
+    }
 
     const guestbookResponse = {
       atUri: params.guestbookAtUri,

@@ -65,12 +65,12 @@ export const getGuestbook = async ({
       and(eq(guestbooks.recordKey, guestbookKey), eq(users.did, ownerDid))
     );
 
-  if (!guestbookEntries) {
+  if (!guestbookEntries || !guestbookEntries.length) {
     return null;
   }
 
   return {
-    title: guestbookEntries[0].title,
+    title: guestbookEntries[0].title || undefined,
     owner: {
       did: guestbookEntries[0].ownerDid,
     },
@@ -78,10 +78,10 @@ export const getGuestbook = async ({
       guestbookEntries.map((entry) => ({
         atUri: `at://${entry.submissionAuthor?.did}/${entry.submissions?.collection}/${entry.submissions?.recordKey}`,
         author: {
-          did: entry.submissionAuthor?.did,
+          did: entry.submissionAuthor!.did,
         },
-        text: entry.submissions?.text,
-        createdAt: entry.submissions?.createdAt.toISOString(),
+        text: entry.submissions!.text || undefined,
+        createdAt: entry.submissions!.createdAt.toISOString(),
       })) || [],
   };
 };

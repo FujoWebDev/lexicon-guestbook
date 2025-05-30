@@ -5,7 +5,10 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": true,
+    "lib": ["ESNext"],
+    "outDir": "./dist"
   },
-  "include": ["site/dist/"]
+  "exclude": ["site/dist/", "site/dist/**/*"]
 }
