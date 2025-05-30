@@ -11,13 +11,7 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import { handler as ssrHandler } from "./site/dist/server/entry.mjs";
 
-import {
-  deleteSessionTokenCookie,
-  getLoggedInClient,
-  oauthClient,
-  setSessionTokenCookie,
-  validateSessionToken,
-} from "./lib/auth.js";
+import { getLoggedInClient } from "./lib/auth.js";
 
 const pubKey = readFileSync("./public_key.pem", "utf-8");
 const PORT = process.env.PORT ?? "3003";
@@ -67,41 +61,6 @@ app.get("/.well-known/did.json", (_, res) => {
     ],
   });
 });
-
-app.post(
-  "/guestbook/:ownerDid/:collection/:guestbookKey/",
-  async (req, res) => {
-    const { ownerDid, guestbookKey } = req.params;
-    const { message } = req.body;
-
-    const loggedInClient = await getLoggedInClient(req, res);
-
-    if (!loggedInClient) {
-      res.sendStatus(500);
-    }
-
-    const guestbookAgent = new AtpBaseClient(
-      loggedInClient!.fetchHandler.bind(loggedInClient)
-    );
-
-    const createReult =
-      await guestbookAgent.com.fujocoded.guestbook.submission.create(
-        {
-          repo: loggedInClient!.did,
-        },
-        {
-          createdAt: new Date().toISOString(),
-          postedTo: `at://${ownerDid}/com.fujocoded.guestbook.book/${guestbookKey}`,
-          text: message,
-        }
-      );
-
-    if (createReult.uri) {
-      res.status(200).send(createReult.uri);
-    }
-    res.sendStatus(500);
-  }
-);
 
 server.com.fujocoded.guestbook.getGuestbook({
   handler: async ({ params }) => {

@@ -127,7 +127,7 @@ Good luck!
 
 - [ ] Return handles of users
 - [ ] Accept guestbook submissions from HTML
-- [ ] Improve HTML generation
+- [x] Improve HTML generation
 - [ ] Check out CORS
 - [ ] Allow creating guestbooks
 

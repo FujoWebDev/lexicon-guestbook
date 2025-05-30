@@ -1,5 +1,6 @@
 ---
 const { ownerDid, collectionName, guestbookKey } = Astro.params;
+import { actions } from "astro:actions";
 import { AtUri } from "@atproto/syntax";
 
 const guestbookAtUri = AtUri.make(ownerDid, collectionName, guestbookKey);
@@ -12,6 +13,7 @@ if (!guestbookResponse.success) {
   throw new Error("Problem with the guestbook");
 }
 
+const result = Astro.getActionResult(actions.postToGuestbook);
 const guestbookData = guestbookResponse.data;
 ---
 
@@ -32,14 +34,31 @@ const guestbookData = guestbookResponse.data;
           </article>
         ))
       }
-      <form
-        action="/guestbook/did:plc:r2vpg2iszskbkegoldmqa322/com.fujocoded.guestbook.book/emotional-support"
-        method="POST"
-      >
-        <input name="message" placeholder="your text" />
+      <form method="POST" action={actions.postToGuestbook}>
+        <input name="text" type="text" placeholder="your text" />
+        <input
+          name="postedTo"
+          value={guestbookAtUri.toString()}
+          type="hidden"
+        />
 
         <button type="submit">Submit</button>
+        {result?.error && <p class="error">{result.error.message}</p>}
+        {result?.data && <div>{result.data}</div>}
       </form>
     </div>
   </body>
 </html>
+
+<script>
+  import { actions } from "astro:actions";
+  import { navigate } from "astro:transitions/client";
+
+  const form = document.querySelector("form");
+  //   form?.addEventListener("submit", async (event) => {
+  //     event.preventDefault();
+  //     const formData = new FormData(form);
+  //     const { error } = await actions.postToGuestbook(formData);
+  //     if (!error) navigate("");
+  //   });
+</script>
