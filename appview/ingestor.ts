@@ -1,3 +1,12 @@
+/**
+ * This file contains the code that listens to the events happening
+ * on the whole ATproto network (through a Jetstream), keeps track
+ * of them in the AppView's database, and thus keeps our AppView data
+ * in sync with the current status of guestbooks in the ATmosphere.
+ *
+ * You can learn all you want to know (and probably more) about
+ * Jetstreams here: https://github.com/bluesky-social/jetstream
+ */
 import WebSocket from "ws";
 import {
   type Record as Book,
@@ -41,25 +50,57 @@ const isBookRecord = (record: unknown): record is Book => isBook(record);
 const isSubmissionRecord = (record: unknown): record is Submission =>
   isSubmission(record);
 
+// To listen to the guestbook events in the ATmosphere we subscribe to a
+// Jetstream service using the websocket protocol (wss://).
+// You don't need to know much about websockets, except that they send
+// event to this program when things happen in the network.
+//
+// Full Jetstream configuration options are at: https://github.com/bluesky-social/jetstream?tab=readme-ov-file#consuming-jetstream
 const JETSTREAM_URL = new URL(
   "subscribe",
   "wss://jetstream2.us-east.bsky.network/"
 );
+// What events do we want to be sent? Anything related to com.fujocoded.guestbook!
 JETSTREAM_URL.searchParams.set(
   "wantedCollections",
   "com.fujocoded.guestbook.*"
 );
 
+// When do we want to start reading events from? By default, the Jetstream will
+// collect events starting from the moment it connects. This means that temporary
+// disconnections might cause data created during the disconnection period to be lost.
+// To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
+// last event on, and start again from there.
+JETSTREAM_URL.searchParams.set("cursor", "0");
+
 const ws = new WebSocket(JETSTREAM_URL);
 
+// First, we define what happens when the connection to the Jetstream starts
+// and ends. In our case, these are mostly courtesy messages.
 ws.on("open", () => {
   console.log("Starting to listen");
-  console.log("Ready to glomp your commits *glomps u too*");
+  console.log("Ready to glomp your guestbook entries *glomps u too*");
 });
 
+ws.on("close", (code, reason) => {
+  console.log("Byeeeeeee");
+  console.log(code, reason);
+});
+
+// Then, we define what happens when a new event happens on the network.
+// A Jetstream will call this function on 3 types of event:
+// 1) A "commit" event for every add/delete/update event related to the
+//    collections we asked it to listen to (in our case, "com.fujocoded.guestbook.*")
+// 2) An "identity" event for when the identity of a user is updated in the network
+//      (e.g. their handle)
+// 3) An "account" event for when accounts get deactivated, or taken down, or undergo
+//    status changes
 ws.on("message", async (data) => {
   const rawEventData = JSON.parse(data.toString());
   if (rawEventData.kind !== "commit") {
+    // Right now we only handle guestbook-related events
+    // TODO: handle other types of events to update user-visible identities, or to
+    // deactivate accounts.
     return;
   }
   const eventData = CommitEventSchema.parse(rawEventData);
@@ -79,6 +120,7 @@ ws.on("message", async (data) => {
     return;
   }
 
+  // Check if this event is related to an actual guestbook
   if (isBookRecord(eventData.commit.record)) {
     await handleBookEvent(
       {
@@ -94,6 +136,7 @@ ws.on("message", async (data) => {
     return;
   }
 
+  // Check if this event is related to a submission to a guestbook
   if (isSubmissionRecord(eventData.commit.record)) {
     await handleSubmissionEvent(
       {
@@ -115,9 +158,4 @@ ws.on("message", async (data) => {
 ws.on("error", (err) => {
   console.error("woopsie")!;
   console.error(err);
-});
-
-ws.on("close", (code, reason) => {
-  console.log("Byeeeeeee");
-  console.log(code, reason);
 });

@@ -19,7 +19,6 @@ export const createRoutes = (app: Express) => {
   });
 
   app.get("/oauth/callback", async (req, res) => {
-    console.dir(req.query);
     const { session: oauthSession } = await oauthClient.callback(
       // @ts-ignore
       new URLSearchParams(req.query)

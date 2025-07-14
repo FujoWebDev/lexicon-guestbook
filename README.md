@@ -204,3 +204,5 @@ Good luck!
 ### Ingestor
 
 - [ ] Catch up with cursor
+- [ ] Handle identity/account events
+- [ ] Handle deletions
