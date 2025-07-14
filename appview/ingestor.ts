@@ -121,5 +121,3 @@ ws.on("close", (code, reason) => {
   console.log("Byeeeeeee");
   console.log(code, reason);
 });
-
-// getGuestbooks({owner: string; name?: string}) : Guestbook[]

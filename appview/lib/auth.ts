@@ -175,7 +175,7 @@ export function deleteSessionTokenCookie(res: Response): void {
   res.clearCookie("session");
 }
 
-const DOMAIN = "worktop.tail2ad46.ts.net";
+const DOMAIN = process.env.APPVIEW_DOMAIN ?? "worktop.tail2ad46.ts.net";
 export const oauthClient = await createClient(DOMAIN);
 
 export const getLoggedInClient = async (req: Request, res: Response) => {

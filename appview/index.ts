@@ -31,7 +31,7 @@ let server = createServer({
   },
 });
 
-const APPVIEW_DOMAIN = "worktop.tail2ad46.ts.net";
+const APPVIEW_DOMAIN = process.env.APPVIEW_DOMAIN ?? "worktop.tail2ad46.ts.net";
 app.get("/.well-known/did.json", (_, res) => {
   res.json({
     "@context": [
@@ -45,6 +45,7 @@ app.get("/.well-known/did.json", (_, res) => {
         id: "did:web:" + APPVIEW_DOMAIN + "#atproto",
         type: "Multikey",
         controller: "did:web:" + APPVIEW_DOMAIN,
+        // TODO: figure out what to do with this
         publicKeyMultibase: pubKey,
       },
     ],
@@ -141,6 +142,7 @@ app.use(async (req, res, next) => {
   const locals = {
     loggedInClient,
     guestbookAgent,
+    appviewDomain: APPVIEW_DOMAIN,
   };
 
   ssrHandler(req, res, next, locals);

@@ -1,5 +1,5 @@
 import { BskyAgent } from "@atproto/api";
-import { AtpBaseClient } from "./generated/api/index.js";
+import { AtpBaseClient } from "../generated/api/index.js";
 import "dotenv/config";
 
 const GUESTBOOK_APPVIEW_DID = "did:web:worktop.tail2ad46.ts.net";
