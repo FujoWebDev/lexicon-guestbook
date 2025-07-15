@@ -5,7 +5,11 @@ import { guestbooks, submissions, users } from "../db/schema.js";
 import { upsertUser } from "./user.js";
 
 export const handleSubmissionEvent = async (
-  params: { submission: Submission; author: string; recordKey: string },
+  params: {
+    submission: Submission;
+    author: string;
+    recordKey: string;
+  },
   eventType: "create" | "update" | "delete"
 ) => {
   const [guestbookKey, collectionType, ownerDid] = params.submission.postedTo
@@ -41,7 +45,7 @@ export const handleSubmissionEvent = async (
     .values({
       recordKey: params.recordKey,
       collection: params.submission.$type,
-      createdAt: new Date(),
+      createdAt: new Date(params.submission.createdAt),
       text: params.submission.text,
       postedTo: guestbookId,
       author: userId.id,
@@ -58,6 +62,7 @@ export const handleSubmissionEvent = async (
         text: params.submission.text,
         postedTo: guestbookId,
         author: userId.id,
+        createdAt: new Date(params.submission.createdAt),
       },
     });
 };
