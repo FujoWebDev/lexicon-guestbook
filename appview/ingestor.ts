@@ -22,6 +22,7 @@ import { handleSubmissionEvent } from "./lib/submission.js";
 import { db } from "./db/index.js";
 import { Cursor } from "./db/schema.js";
 import { eq } from "drizzle-orm";
+import { cursorToDate, getLastCursor, updateCursor } from "./lib/cursor.js";
 
 const CommitEventSchema = z.object({
   did: z.string(),
@@ -76,14 +77,13 @@ JETSTREAM_URL.searchParams.set(
 // disconnections might cause data created during the disconnection period to be lost.
 // To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
 // last event on, and start again from there.
-console.log(await db.select({ cursor: Cursor.cursor }).from(Cursor).limit(1));
-let LAST_CURSOR = (await db.select().from(Cursor).limit(1))[0]?.cursor;
+let LAST_CURSOR = await getLastCursor();
 const CURSOR_UPDATE_INTERVAL = 5 * 60 * 1000; // We'll update cursor every 5 minutes
 if (LAST_CURSOR) {
   console.log(
-    `Starting catch up from cursor: ${LAST_CURSOR} (${new Date(
-      LAST_CURSOR / 1000
-    ).toLocaleTimeString()})`
+    `Starting catch up from cursor: ${LAST_CURSOR} (${cursorToDate(
+      LAST_CURSOR
+    ).toLocaleString()})`
   );
   JETSTREAM_URL.searchParams.set("cursor", LAST_CURSOR.toString());
 }
@@ -170,25 +170,11 @@ ws.on("message", async (data) => {
     eventData.time_us - LAST_CURSOR > CURSOR_UPDATE_INTERVAL
   ) {
     console.log("Updating cursor...");
-    if (!LAST_CURSOR) {
-      // Insert the new cursor into the database.
-      // We hardcode id 1 for the cursor since it's a single value.
-      await db.insert(Cursor).values({
-        id: 1,
-        cursor: eventData.time_us,
-      });
-    } else {
-      await db
-        .update(Cursor)
-        .set({
-          cursor: eventData.time_us,
-        })
-        .where(eq(Cursor.id, 1));
-    }
+    updateCursor(eventData.time_us);
     LAST_CURSOR = eventData.time_us;
     console.log(
-      `Updated cursor to: ${LAST_CURSOR} (${new Date(
-        LAST_CURSOR / 1000
+      `Updated cursor to: ${LAST_CURSOR} (${cursorToDate(
+        LAST_CURSOR
       ).toLocaleTimeString()})`
     );
   }

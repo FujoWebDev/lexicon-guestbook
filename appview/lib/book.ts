@@ -21,13 +21,22 @@ export const handleBookEvent = async (
         })
         .execute()
     )?.[0]?.id;
-    await db.insert(guestbooks).values({
-      recordKey: params.recordKey,
-      collection: params.book.$type,
-      title: params.book.title,
-      owner: userId,
-      record: JSON.stringify(params.book),
-    });
+    await db
+      .insert(guestbooks)
+      .values({
+        recordKey: params.recordKey,
+        collection: params.book.$type,
+        title: params.book.title,
+        owner: userId,
+        record: JSON.stringify(params.book),
+      })
+      .onConflictDoUpdate({
+        target: [guestbooks.recordKey, guestbooks.collection, guestbooks.owner],
+        set: {
+          title: params.book.title,
+          record: JSON.stringify(params.book),
+        },
+      });
   }
 };
 

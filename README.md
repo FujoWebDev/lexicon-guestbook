@@ -203,6 +203,7 @@ Good luck!
 
 ### Ingestor
 
-- [ ] Catch up with cursor
+- [x] Catch up with cursor
+- [ ] Change timing of cursor save to consider all operations
 - [ ] Handle identity/account events
 - [ ] Handle deletions
