@@ -58,3 +58,8 @@ export const AuthSession = sqliteTable("AuthSession", {
   userDid: text(),
   expiresAt: int(),
 });
+
+export const Cursor = sqliteTable("cursor", {
+  id: int().primaryKey(),
+  cursor: int().notNull(),
+});

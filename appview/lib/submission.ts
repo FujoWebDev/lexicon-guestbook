@@ -36,15 +36,30 @@ export const handleSubmissionEvent = async (
     throw new Error("Attempting submission to unknown guestbook");
   }
 
-  await db.insert(submissions).values({
-    recordKey: params.recordKey,
-    collection: params.submission.$type,
-    createdAt: new Date(),
-    text: params.submission.text,
-    postedTo: guestbookId,
-    author: userId.id,
-    record: JSON.stringify(params.submission),
-  });
+  await db
+    .insert(submissions)
+    .values({
+      recordKey: params.recordKey,
+      collection: params.submission.$type,
+      createdAt: new Date(),
+      text: params.submission.text,
+      postedTo: guestbookId,
+      author: userId.id,
+      record: JSON.stringify(params.submission),
+    })
+    .onConflictDoUpdate({
+      target: [
+        submissions.author,
+        submissions.recordKey,
+        submissions.collection,
+      ],
+      // TODO: update the date to actual creation time
+      set: {
+        text: params.submission.text,
+        postedTo: guestbookId,
+        author: userId.id,
+      },
+    });
 };
 
 export const getSubmissionByGuestbook = async ({

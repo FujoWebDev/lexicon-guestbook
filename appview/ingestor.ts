@@ -19,9 +19,13 @@ import {
 import { z } from "zod";
 import { handleBookEvent } from "./lib/book.js";
 import { handleSubmissionEvent } from "./lib/submission.js";
+import { db } from "./db/index.js";
+import { Cursor } from "./db/schema.js";
+import { eq } from "drizzle-orm";
 
 const CommitEventSchema = z.object({
   did: z.string(),
+  time_us: z.number(),
   kind: z.literal("commit"),
   commit: z.union([
     z.object({
@@ -60,6 +64,7 @@ const JETSTREAM_URL = new URL(
   "subscribe",
   "wss://jetstream2.us-east.bsky.network/"
 );
+
 // What events do we want to be sent? Anything related to com.fujocoded.guestbook!
 JETSTREAM_URL.searchParams.set(
   "wantedCollections",
@@ -71,7 +76,17 @@ JETSTREAM_URL.searchParams.set(
 // disconnections might cause data created during the disconnection period to be lost.
 // To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
 // last event on, and start again from there.
-JETSTREAM_URL.searchParams.set("cursor", "0");
+console.log(await db.select({ cursor: Cursor.cursor }).from(Cursor).limit(1));
+let LAST_CURSOR = (await db.select().from(Cursor).limit(1))[0]?.cursor;
+const CURSOR_UPDATE_INTERVAL = 5 * 60 * 1000; // We'll update cursor every 5 minutes
+if (LAST_CURSOR) {
+  console.log(
+    `Starting catch up from cursor: ${LAST_CURSOR} (${new Date(
+      LAST_CURSOR / 1000
+    ).toLocaleTimeString()})`
+  );
+  JETSTREAM_URL.searchParams.set("cursor", LAST_CURSOR.toString());
+}
 
 const ws = new WebSocket(JETSTREAM_URL);
 
@@ -133,7 +148,6 @@ ws.on("message", async (data) => {
     console.log(
       `${eventData.commit.operation}d book: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
     );
-    return;
   }
 
   // Check if this event is related to a submission to a guestbook
@@ -149,10 +163,37 @@ ws.on("message", async (data) => {
     console.log(
       `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
     );
-    return;
   }
 
-  console.error(`Unknown record type: ${eventData.commit.record.$type}`);
+  if (
+    !LAST_CURSOR ||
+    eventData.time_us - LAST_CURSOR > CURSOR_UPDATE_INTERVAL
+  ) {
+    console.log("Updating cursor...");
+    if (!LAST_CURSOR) {
+      // Insert the new cursor into the database.
+      // We hardcode id 1 for the cursor since it's a single value.
+      await db.insert(Cursor).values({
+        id: 1,
+        cursor: eventData.time_us,
+      });
+    } else {
+      await db
+        .update(Cursor)
+        .set({
+          cursor: eventData.time_us,
+        })
+        .where(eq(Cursor.id, 1));
+    }
+    LAST_CURSOR = eventData.time_us;
+    console.log(
+      `Updated cursor to: ${LAST_CURSOR} (${new Date(
+        LAST_CURSOR / 1000
+      ).toLocaleTimeString()})`
+    );
+  }
+
+  // console.error(`Unknown record type: ${eventData.commit.record.$type}`);
 });
 
 ws.on("error", (err) => {
