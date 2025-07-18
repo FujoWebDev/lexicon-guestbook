@@ -26,7 +26,10 @@ const result = Astro.getActionResult(actions.postToGuestbook);
           <article>
             <>
               <p>
-                <span class="author">{submission.author.did}</span> says:
+                <span class="author">
+                  {submission.author.handle ?? submission.author.did}
+                </span>{" "}
+                says:
                 <span class="text">{submission.text}</span>
               </p>
               <datetime>{submission.createdAt}</datetime>

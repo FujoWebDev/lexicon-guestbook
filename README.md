@@ -180,17 +180,20 @@ Good luck!
 
 ### AppView
 
-- [ ] Return handles of users
+- [x] Return handles of users
+- [ ] Return avatars of users
 - [ ] Accept guestbook submissions from HTML
 - [x] Improve HTML generation
 - [ ] Check out CORS
 - [ ] Allow creating guestbooks
+- [ ] Move Astro-based client to client directory
 
 ### Client CLI
 
 - [ ] Get rid of app passwords
 - [ ] Allow global configuration
 - [ ] Create initialization script
+- [ ] Test that it's still working
 
 #### Client HTML iframe
 

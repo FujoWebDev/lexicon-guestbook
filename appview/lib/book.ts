@@ -3,6 +3,7 @@ import { type Record as Book } from "../../client/generated/api/types/com/fujoco
 import { db } from "../db/index.js";
 import { guestbooks, submissions, users } from "../db/schema.js";
 import { eq, getTableColumns, and } from "drizzle-orm";
+import { resolveBskyUserProfiles } from "./user.js";
 
 export const handleBookEvent = async (
   params: { book: Book; author: string; recordKey: string },
@@ -78,16 +79,25 @@ export const getGuestbook = async ({
     return null;
   }
 
+  const profilesMap = await resolveBskyUserProfiles([
+    ownerDid,
+    ...guestbookEntries
+      .map((entry) => entry.submissionAuthor?.did)
+      .filter((x): x is string => !!x),
+  ]);
+
   return {
     title: guestbookEntries[0].title || undefined,
     owner: {
       did: guestbookEntries[0].ownerDid,
+      handle: profilesMap.get(ownerDid)?.handle,
     },
     submissions:
       guestbookEntries.map((entry) => ({
         atUri: `at://${entry.submissionAuthor?.did}/${entry.submissions?.collection}/${entry.submissions?.recordKey}`,
         author: {
           did: entry.submissionAuthor!.did,
+          handle: profilesMap.get(entry.submissionAuthor!.did)?.handle,
         },
         text: entry.submissions!.text || undefined,
         createdAt: entry.submissions!.createdAt.toISOString(),

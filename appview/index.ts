@@ -11,6 +11,7 @@ import bodyParser from "body-parser";
 import { handler as ssrHandler } from "./site/dist/server/entry.mjs";
 
 import { getLoggedInClient } from "./lib/auth.js";
+import { resolveBskyUserProfiles } from "./lib/user.js";
 
 const pubKey = readFileSync("./public_key.pem", "utf-8");
 const PORT = process.env.PORT ?? "3003";
@@ -133,6 +134,7 @@ app.use(async (req, res, next) => {
       ? loggedInClient.fetchHandler.bind(loggedInClient)
       : { service: `https://${APPVIEW_DOMAIN}` }
   );
+  guestbookAgent.com.atproto.identity.resolveIdentity;
   if (loggedInClient) {
     guestbookAgent?.setHeader(
       "atproto-proxy",
