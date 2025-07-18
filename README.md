@@ -182,8 +182,10 @@ Good luck!
 
 - [x] Return handles of users
 - [x] Return avatars of users
-- [ ] Accept guestbook submissions from HTML
+- [ ] Save user profile info to database
+- [ ] Periodically refresh user profile info in database
 - [x] Improve HTML generation
+- [ ] Accept guestbook submissions from HTML iframes
 - [ ] Check out CORS
 - [ ] Allow creating guestbooks
 - [ ] Move Astro-based client to client directory
@@ -194,6 +196,14 @@ Good luck!
 - [ ] Allow global configuration
 - [ ] Create initialization script
 - [ ] Test that it's still working
+
+### Astro Client
+
+- [ ] Style the guestbook page
+- [ ] Make the write submission form nicer
+- [ ] Inform user that they are logged in
+- [ ] Allow creating guestbooks
+- [ ] Allow listing guestbooks of a user
 
 #### Client HTML iframe
 
