@@ -91,6 +91,7 @@ export const getGuestbook = async ({
     owner: {
       did: guestbookEntries[0].ownerDid,
       handle: profilesMap.get(ownerDid)?.handle,
+      avatar: profilesMap.get(ownerDid)?.avatar,
     },
     submissions:
       guestbookEntries.map((entry) => ({
@@ -98,6 +99,7 @@ export const getGuestbook = async ({
         author: {
           did: entry.submissionAuthor!.did,
           handle: profilesMap.get(entry.submissionAuthor!.did)?.handle,
+          avatar: profilesMap.get(entry.submissionAuthor!.did)?.avatar,
         },
         text: entry.submissions!.text || undefined,
         createdAt: entry.submissions!.createdAt.toISOString(),

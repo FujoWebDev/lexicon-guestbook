@@ -26,6 +26,7 @@ const result = Astro.getActionResult(actions.postToGuestbook);
           <article>
             <>
               <p>
+                <img src={submission.author.avatar} />
                 <span class="author">
                   {submission.author.handle ?? submission.author.did}
                 </span>{" "}
@@ -56,6 +57,13 @@ const result = Astro.getActionResult(actions.postToGuestbook);
     </div>
   </body>
 </html>
+
+<style>
+  img {
+    width: 100px;
+    height: auto;
+  }
+</style>
 
 <script>
   import { actions } from "astro:actions";

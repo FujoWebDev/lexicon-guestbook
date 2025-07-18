@@ -75,7 +75,8 @@
           "type": "string",
           "format": "did"
         },
-        "handle": { "type": "string", "format": "handle" }
+        "handle": { "type": "string", "format": "handle" },
+        "avatar": { "type": "string", "format": "uri" }
       }
     }
   }

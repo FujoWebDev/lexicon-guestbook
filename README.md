@@ -181,7 +181,7 @@ Good luck!
 ### AppView
 
 - [x] Return handles of users
-- [ ] Return avatars of users
+- [x] Return avatars of users
 - [ ] Accept guestbook submissions from HTML
 - [x] Improve HTML generation
 - [ ] Check out CORS
