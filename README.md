@@ -188,7 +188,6 @@ Good luck!
 - [ ] Accept guestbook submissions from HTML iframes
 - [ ] Check out CORS
 - [ ] Allow creating guestbooks
-- [ ] Move Astro-based client to client directory
 
 ### Client CLI
 
@@ -204,10 +203,11 @@ Good luck!
 - [ ] Inform user that they are logged in
 - [ ] Allow creating guestbooks
 - [ ] Allow listing guestbooks of a user
+- [ ] Move Astro-based client to client directory
 
 #### Client HTML iframe
 
-- [ ] Allow submission via form
+- [ ] Figure out how to allow submission via form
 
 #### Others
 
