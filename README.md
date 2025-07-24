@@ -200,10 +200,14 @@ Good luck!
 
 - [ ] Style the guestbook page
 - [ ] Make the write submission form nicer
-- [ ] Inform user that they are logged in
+- [ ] Make our login look nice
+  - [ ] Inform user that they are logged in
+  - [ ] Allow users to use their handle and not just DID
+  - [ ] Allow users to log out
 - [ ] Allow creating guestbooks
 - [ ] Allow listing guestbooks of a user
 - [ ] Move Astro-based client to client directory
+- [ ]
 
 #### Client HTML iframe
 

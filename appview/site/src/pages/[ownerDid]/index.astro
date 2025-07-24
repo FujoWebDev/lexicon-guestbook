@@ -1,0 +1,39 @@
+---
+// To fetch a user data we first extract its DID from the page URL.
+// This is an unchanging identifier of this specific user across
+// the whole ATproto network.
+const { ownerDid } = Astro.params;
+import { AtUri } from "@atproto/syntax";
+
+const guestbooks =
+  await Astro.locals.guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
+    ownerDid: ownerDid,
+  });
+
+if (!guestbooks.success) {
+  throw new Error(`There was an error fetching the data for ${ownerDid}`);
+}
+---
+
+<div>
+  <h2>Welcome {ownerDid}!</h2>
+  Here are your guestbooks:
+  <ul>
+    {
+      guestbooks.data.guestbooks.map((guestbook) => {
+        const guestbookAtUri = new AtUri(guestbook.atUri);
+        return (
+          <li>
+            <a
+              href={`guestbook/${ownerDid}/${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+            >
+              {guestbook.title ??
+                `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+            </a>
+            (submissions: {guestbook.submissionsCount ?? "N/A"})
+          </li>
+        );
+      })
+    }
+  </ul>
+</div>

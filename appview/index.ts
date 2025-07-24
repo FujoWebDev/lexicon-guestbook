@@ -102,6 +102,7 @@ server.com.fujocoded.guestbook.getGuestbooks({
         });
 
         return {
+          title: guestbook.title ?? undefined,
           atUri: `at://${guestbook.ownerDid}/${guestbook.collection}/${guestbook.recordKey}`,
           owner: {
             did: guestbook.ownerDid,
@@ -140,6 +141,7 @@ app.use(async (req, res, next) => {
       `did:web:${APPVIEW_DOMAIN}#guestbook_appview`
     );
   }
+
   const locals = {
     loggedInClient,
     guestbookAgent,

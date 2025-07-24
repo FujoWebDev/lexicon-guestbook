@@ -30,10 +30,7 @@ export const createRoutes = (app: Express) => {
     const session = await createSession(token, agent.did!);
     setSessionTokenCookie(res, token, session.expiresAt);
 
-    res.redirect(
-      307,
-      "/guestbook/did:plc:r2vpg2iszskbkegoldmqa322/com.fujocoded.guestbook.book/emotional-support"
-    );
+    res.redirect(307, `/${agent.did}`);
   });
 
   app.get("/oauth/authorize", async (req, res) => {
