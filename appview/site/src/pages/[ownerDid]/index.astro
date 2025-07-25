@@ -4,6 +4,7 @@
 // the whole ATproto network.
 const { ownerDid } = Astro.params;
 import { AtUri } from "@atproto/syntax";
+import CreateGuestbookForm from "../../../components/CreateGuestbookForm.astro";
 
 const guestbooks =
   await Astro.locals.guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
@@ -16,24 +17,30 @@ if (!guestbooks.success) {
 ---
 
 <div>
-  <h2>Welcome {ownerDid}!</h2>
-  Here are your guestbooks:
+  <h2>
+    Welcome {ownerDid}! (<a href={`https://pdsls.dev/at/${ownerDid}`}>pdsls</a>)
+  </h2> Here are your guestbooks:
   <ul>
     {
       guestbooks.data.guestbooks.map((guestbook) => {
         const guestbookAtUri = new AtUri(guestbook.atUri);
         return (
           <li>
-            <a
-              href={`guestbook/${ownerDid}/${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
-            >
-              {guestbook.title ??
-                `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
-            </a>
-            (submissions: {guestbook.submissionsCount ?? "N/A"})
+            <div>
+              <a
+                href={`guestbook/${ownerDid}/${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+              >
+                {guestbook.title ??
+                  `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+              </a>
+              (submissions: {guestbook.submissionsCount ?? "N/A"})
+            </div>
+            <div style="color:gray; font-size:smaller">{guestbook.atUri}</div>
           </li>
         );
       })
     }
   </ul>
+  <h3>Create new guestbook</h3>
+  <CreateGuestbookForm />
 </div>

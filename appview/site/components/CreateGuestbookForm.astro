@@ -1,0 +1,14 @@
+---
+import { actions } from "astro:actions";
+
+const result = Astro.getActionResult(actions.createGuestbook);
+---
+
+<form method="POST" action={actions.createGuestbook}>
+  <input name="key" type="text" placeholder="Unique id of your guestbook" />
+  <input name="title" type="text" placeholder="Title of your guestbook" />
+
+  <button type="submit">Submit</button>
+  {result?.error && <p class="error">{result.error.message}</p>}
+  {result?.data && <div>{result.data.uri}</div>}
+</form>
