@@ -3,32 +3,21 @@ import { type Record as Book } from "../../client/generated/api/types/com/fujoco
 import { db } from "../db/index.js";
 import { guestbooks, submissions, users } from "../db/schema.js";
 import { eq, getTableColumns, and } from "drizzle-orm";
-import { resolveBskyUserProfiles } from "./user.js";
+import { resolveBskyUserProfiles, upsertUser } from "./user.js";
 
 export const handleBookEvent = async (
   params: { book: Book; author: string; recordKey: string },
   eventType: "create" | "update" | "delete"
 ) => {
   if (eventType == "create") {
-    const userId = (
-      await db
-        .insert(users)
-        .values({
-          did: params.author,
-        })
-        .onConflictDoNothing()
-        .returning({
-          id: users.id,
-        })
-        .execute()
-    )?.[0]?.id;
+    const user = await upsertUser({ did: params.author });
     await db
       .insert(guestbooks)
       .values({
         recordKey: params.recordKey,
         collection: params.book.$type,
         title: params.book.title,
-        owner: userId,
+        owner: user.id,
         record: JSON.stringify(params.book),
       })
       .onConflictDoUpdate({

@@ -77,16 +77,39 @@ JETSTREAM_URL.searchParams.set(
 // disconnections might cause data created during the disconnection period to be lost.
 // To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
 // last event on, and start again from there.
-let LAST_CURSOR = await getLastCursor();
-const CURSOR_UPDATE_INTERVAL = 5 * 60 * 1000; // We'll update cursor every 5 minutes
-if (LAST_CURSOR) {
+let LAST_CURSOR_MICROSECONDS = await getLastCursor();
+// We'll update the cursor once every hour of data we process
+// Tests show we roughly process a hour of data every minute
+const CURSOR_UPDATE_INTERVAL_MILLISECONDS = 60 * 60 * 1000;
+if (LAST_CURSOR_MICROSECONDS) {
   console.log(
-    `Starting catch up from cursor: ${LAST_CURSOR} (${cursorToDate(
-      LAST_CURSOR
+    `Starting catch up from cursor: ${LAST_CURSOR_MICROSECONDS} (${cursorToDate(
+      LAST_CURSOR_MICROSECONDS
     ).toLocaleString()})`
   );
-  JETSTREAM_URL.searchParams.set("cursor", LAST_CURSOR.toString());
+  JETSTREAM_URL.searchParams.set("cursor", LAST_CURSOR_MICROSECONDS.toString());
 }
+
+// TODO: if the record is a record that needs saving in the database
+// update the cursor after saving it to the database
+const maybeUpdateCursor = async (timestampMicroseconds: number) => {
+  // Orginal timestamp is in microseconds
+  const elapsedTimeMilliseconds =
+    (timestampMicroseconds - (LAST_CURSOR_MICROSECONDS ?? 0)) / 1000;
+  if (
+    !LAST_CURSOR_MICROSECONDS ||
+    elapsedTimeMilliseconds > CURSOR_UPDATE_INTERVAL_MILLISECONDS
+  ) {
+    LAST_CURSOR_MICROSECONDS = timestampMicroseconds;
+    console.log("Updating cursor...");
+    await updateCursor(LAST_CURSOR_MICROSECONDS);
+    console.log(
+      `Updated cursor to: ${LAST_CURSOR_MICROSECONDS} (${cursorToDate(
+        LAST_CURSOR_MICROSECONDS
+      ).toLocaleString()})`
+    );
+  }
+};
 
 const ws = new WebSocket(JETSTREAM_URL);
 
@@ -94,7 +117,7 @@ const ws = new WebSocket(JETSTREAM_URL);
 // and ends. In our case, these are mostly courtesy messages.
 ws.on("open", () => {
   console.log("Starting to listen");
-  console.log("Ready to glomp your guestbook entries *glomps u too*");
+  console.log("Ready to glomp your guestbook events *glomps u too*");
 });
 
 ws.on("close", (code, reason) => {
@@ -112,6 +135,7 @@ ws.on("close", (code, reason) => {
 //    status changes
 ws.on("message", async (data) => {
   const rawEventData = JSON.parse(data.toString());
+  await maybeUpdateCursor(rawEventData.time_us);
   if (rawEventData.kind !== "commit") {
     // Right now we only handle guestbook-related events
     // TODO: handle other types of events to update user-visible identities, or to
@@ -162,20 +186,6 @@ ws.on("message", async (data) => {
     );
     console.log(
       `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
-    );
-  }
-
-  if (
-    !LAST_CURSOR ||
-    eventData.time_us - LAST_CURSOR > CURSOR_UPDATE_INTERVAL
-  ) {
-    console.log("Updating cursor...");
-    updateCursor(eventData.time_us);
-    LAST_CURSOR = eventData.time_us;
-    console.log(
-      `Updated cursor to: ${LAST_CURSOR} (${cursorToDate(
-        LAST_CURSOR
-      ).toLocaleTimeString()})`
     );
   }
 
