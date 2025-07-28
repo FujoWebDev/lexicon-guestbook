@@ -1,4 +1,5 @@
 import { AtpBaseClient } from "../../../../client/generated/api/index";
+import { DidResolver } from "@atproto/identity";
 
 const APPVIEW_DOMAIN = process.env.APPVIEW_DOMAIN ?? "worktop.tail2ad46.ts.net";
 export const getGuestbookAgent = () => {
@@ -15,4 +16,10 @@ export const getGuestbookAgent = () => {
   );
   // }
   return guestbookAgent;
+};
+
+const IDENTITY_RESOLVER = new DidResolver({});
+export const didToHandle = async (did: string) => {
+  const atprotoData = await IDENTITY_RESOLVER.resolveAtprotoData(did);
+  return atprotoData.handle;
 };

@@ -5,9 +5,10 @@
 const { partialDid } = Astro.params;
 import { AtUri } from "@atproto/syntax";
 import CreateGuestbookForm from "../../../components/CreateGuestbookForm.astro";
-import { getGuestbookAgent } from "../../lib/atproto";
+import { getGuestbookAgent, didToHandle } from "../../lib/atproto";
 
 const ownerDid = "did:" + partialDid;
+const ownerHandle = await didToHandle(ownerDid);
 
 const guestbooks =
   await getGuestbookAgent().com.fujocoded.guestbook.getGuestbooks({
@@ -21,8 +22,10 @@ if (!guestbooks.success) {
 
 <div>
   <h2>
-    Welcome {ownerDid}! (<a href={`https://pdsls.dev/at/${ownerDid}`}>pdsls</a>)
-  </h2> Here are your guestbooks:
+    @{ownerHandle}'s Guestbooks! (<a href={`https://pdsls.dev/at/${ownerDid}`}
+      >pdsls</a
+    >)
+  </h2>
   <ul>
     {
       guestbooks.data.guestbooks.map((guestbook) => {
@@ -44,6 +47,6 @@ if (!guestbooks.success) {
       })
     }
   </ul>
-  <h3>Create new guestbook</h3>
-  <CreateGuestbookForm />
+  <!-- <h3>Create new guestbook</h3>
+  <CreateGuestbookForm /> -->
 </div>
