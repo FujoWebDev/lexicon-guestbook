@@ -1,6 +1,5 @@
 import express, { Response } from "express";
 import { createServer } from "../client/generated/server/index.js";
-import { AtpBaseClient } from "../client/generated/api/index.js";
 import { getGuestbook, getGuestbooksByUser } from "./lib/book.js";
 import { getSubmissionByGuestbook } from "./lib/submission.js";
 import { OutputSchema as GuestbookOutput } from "../client/generated/server/types/com/fujocoded/guestbook/getGuestbooks.js";
@@ -8,10 +7,6 @@ import { readFileSync } from "node:fs";
 import { createRoutes } from "./routes/auth.js";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import { handler as ssrHandler } from "./site/dist/server/entry.mjs";
-
-import { getLoggedInClient } from "./lib/auth.js";
-import { didToHandle, resolveBskyUserProfiles } from "./lib/user.js";
 
 const pubKey = readFileSync("./public_key.pem", "utf-8");
 const PORT = process.env.PORT ?? "3003";
@@ -122,34 +117,6 @@ server.com.fujocoded.guestbook.getGuestbooks({
 });
 
 createRoutes(app);
-
-app.use("/", express.static("site/dist/client/"));
-app.use(async (req, res, next) => {
-  if (req.url.startsWith("/xrpc")) {
-    return next();
-  }
-
-  const loggedInClient = await getLoggedInClient(req, res);
-  const guestbookAgent = new AtpBaseClient(
-    loggedInClient
-      ? loggedInClient.fetchHandler.bind(loggedInClient)
-      : { service: `https://${APPVIEW_DOMAIN}` }
-  );
-  if (loggedInClient) {
-    guestbookAgent?.setHeader(
-      "atproto-proxy",
-      `did:web:${APPVIEW_DOMAIN}#guestbook_appview`
-    );
-  }
-
-  const locals = {
-    loggedInClient,
-    guestbookAgent,
-    appviewDomain: APPVIEW_DOMAIN,
-  };
-
-  ssrHandler(req, res, next, locals);
-});
 
 app.use(server.xrpc.router);
 app.listen(PORT, () => {

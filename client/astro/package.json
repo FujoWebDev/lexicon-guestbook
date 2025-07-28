@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A website to create and manage your guestbook",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

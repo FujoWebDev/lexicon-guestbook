@@ -1,5 +1,6 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { getGuestbookAgent } from "../lib/atproto";
 
 export const server = {
   postToGuestbook: defineAction({
@@ -11,7 +12,7 @@ export const server = {
     }),
     handler: async (input, context) => {
       const result =
-        await context.locals.guestbookAgent.com.fujocoded.guestbook.submission.create(
+        await getGuestbookAgent().com.fujocoded.guestbook.submission.create(
           {
             repo: context.locals.loggedInClient!.did,
           },
@@ -32,16 +33,16 @@ export const server = {
       title: z.string().max(200),
     }),
     handler: async (input, context) => {
-      const guestbookClient = context.locals.guestbookAgent;
-      const data = await guestbookClient.com.fujocoded.guestbook.book.create(
-        {
-          repo: context.locals.loggedInClient.did,
-          rkey: input.key,
-        },
-        {
-          title: input.title,
-        }
-      );
+      const data =
+        await getGuestbookAgent().com.fujocoded.guestbook.book.create(
+          {
+            repo: context.locals.loggedInClient.did,
+            rkey: input.key,
+          },
+          {
+            title: input.title,
+          }
+        );
 
       return data;
     },

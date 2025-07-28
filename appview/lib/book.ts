@@ -83,15 +83,18 @@ export const getGuestbook = async ({
       avatar: profilesMap.get(ownerDid)?.avatar,
     },
     submissions:
-      guestbookEntries.map((entry) => ({
-        atUri: `at://${entry.submissionAuthor?.did}/${entry.submissions?.collection}/${entry.submissions?.recordKey}`,
-        author: {
-          did: entry.submissionAuthor!.did,
-          handle: profilesMap.get(entry.submissionAuthor!.did)?.handle,
-          avatar: profilesMap.get(entry.submissionAuthor!.did)?.avatar,
-        },
-        text: entry.submissions!.text || undefined,
-        createdAt: entry.submissions!.createdAt.toISOString(),
-      })) || [],
+      guestbookEntries
+        // We only take guestbookEntries that have submissions associated with them
+        .filter((entry) => entry.submissions)
+        .map((entry) => ({
+          atUri: `at://${entry.submissionAuthor?.did}/${entry.submissions?.collection}/${entry.submissions?.recordKey}`,
+          author: {
+            did: entry.submissionAuthor!.did,
+            handle: profilesMap.get(entry.submissionAuthor!.did)?.handle,
+            avatar: profilesMap.get(entry.submissionAuthor!.did)?.avatar,
+          },
+          text: entry.submissions!.text || undefined,
+          createdAt: entry.submissions!.createdAt.toISOString(),
+        })) || [],
   };
 };

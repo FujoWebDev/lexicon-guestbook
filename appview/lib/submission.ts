@@ -81,7 +81,7 @@ export const getSubmissionByGuestbook = async ({
       ...getTableColumns(submissions),
     })
     .from(submissions)
-    .innerJoin(guestbooks, eq(guestbooks.id, submissions.postedTo))
+    .leftJoin(guestbooks, eq(guestbooks.id, submissions.postedTo))
     .innerJoin(users, eq(users.id, guestbooks.owner))
     .where(
       and(

@@ -2,13 +2,16 @@
 // To fetch a user data we first extract its DID from the page URL.
 // This is an unchanging identifier of this specific user across
 // the whole ATproto network.
-const { ownerDid } = Astro.params;
+const { partialDid } = Astro.params;
 import { AtUri } from "@atproto/syntax";
 import CreateGuestbookForm from "../../../components/CreateGuestbookForm.astro";
+import { getGuestbookAgent } from "../../lib/atproto";
+
+const ownerDid = "did:" + partialDid;
 
 const guestbooks =
-  await Astro.locals.guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
-    ownerDid: ownerDid,
+  await getGuestbookAgent().com.fujocoded.guestbook.getGuestbooks({
+    ownerDid,
   });
 
 if (!guestbooks.success) {
