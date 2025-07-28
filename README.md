@@ -189,7 +189,7 @@ Good luck!
 - [ ] Check out CORS
 - [ ] Allow creating guestbooks
 
-### Client CLI
+### CLI Client
 
 - [ ] Get rid of app passwords
 - [ ] Allow global configuration
@@ -204,12 +204,11 @@ Good luck!
   - [ ] Inform user that they are logged in
   - [ ] Allow users to use their handle and not just DID
   - [ ] Allow users to log out
-- [ ] Allow creating guestbooks
-- [ ] Allow listing guestbooks of a user
+- [x] Allow creating guestbooks
+- [x] Allow listing guestbooks of a user
 - [ ] Move Astro-based client to client directory
-- [ ]
 
-#### Client HTML iframe
+#### HTML iframe Client
 
 - [ ] Figure out how to allow submission via form
 
