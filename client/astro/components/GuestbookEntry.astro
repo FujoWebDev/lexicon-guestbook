@@ -1,0 +1,62 @@
+---
+import type { SubmissionView } from "../../generated/api/types/com/fujocoded/guestbook/defs";
+
+interface Props extends SubmissionView {}
+
+const { author, text, createdAt } = Astro.props;
+
+const authorLink = author.handle
+  ? author.handle
+  : `https://pdsls.dev/at/${author.did}`;
+---
+
+<article>
+  <div>
+    <img src={author.avatar} />
+    <span>
+      <a class="author" href={authorLink}>@{author.handle ?? author.did}</a>
+      says:</span
+    >
+  </div>
+  <p class="text">{text}</p>
+  <datetime>
+    {
+      new Date(createdAt).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    }
+  </datetime>
+</article>
+
+<style>
+  article {
+    background-color: #a2e3c3;
+    padding-inline: 20px;
+    padding-block: 10px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  img {
+    width: 25px;
+    height: auto;
+    border-radius: 100%;
+  }
+  div:has(span > .author) {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  p {
+    padding-block: 10px;
+    padding-inline: 20px;
+    background-color: hsl(150 54% 83% / 1);
+    border-radius: 10px;
+  }
+  datetime {
+    display: block;
+    text-align: right;
+    font-size: 10px;
+  }
+</style>

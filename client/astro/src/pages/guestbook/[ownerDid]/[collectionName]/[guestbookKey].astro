@@ -6,9 +6,11 @@ const { ownerDid, collectionName, guestbookKey } = Astro.params;
 import { actions } from "astro:actions";
 import { AtUri } from "@atproto/syntax";
 import { getGuestbookAgent } from "../../../../lib/atproto";
+import GuestbookEntry from "../../../../../components/GuestbookEntry.astro";
+import Layout from "../../../../../layouts/Layout.astro";
 
 const guestbookAtUri = AtUri.make(ownerDid, collectionName, guestbookKey);
-console.log(guestbookAtUri);
+
 const guestbookResponse =
   // The guestbook agent is our authenticated client that knows how to fetch
   // data for our guestbook from an AppView that implements the fujocoded
@@ -27,51 +29,48 @@ const guestbookData = guestbookResponse.data;
 const result = Astro.getActionResult(actions.postToGuestbook);
 ---
 
-<html>
-  <body>
-    {!!guestbookData?.title && <h1>{guestbookData?.title}</h1>}
-    <div class="submissions">
-      {
-        guestbookData?.submissions.map((submission) => (
-          <article>
-            <>
-              <p>
-                <img src={submission.author.avatar} />
-                <span class="author">
-                  {submission.author.handle ?? submission.author.did}
-                </span>{" "}
-                says:
-                <span class="text">{submission.text}</span>
-              </p>
-              <datetime>{submission.createdAt}</datetime>
-            </>
-          </article>
-        ))
-      }
-      {
-        Astro.locals.loggedInClient && (
-          <form method="POST" action={actions.postToGuestbook}>
-            <input name="text" type="text" placeholder="your text" />
-            <input
-              name="postedTo"
-              value={guestbookAtUri.toString()}
-              type="hidden"
-            />
+<Layout>
+  {!!guestbookData?.title && <h1>{guestbookData?.title}</h1>}
+  <div>
+    A guestbook for <a href={`https://${guestbookData.owner.handle}`}>
+      @{guestbookData.owner.handle}</a
+    > (<a href={`/${guestbookData.owner.did}`}>see all</a>)
+  </div>
+  <div class="submissions">
+    {!guestbookData?.submissions.length && <div>This guestbook is empty.</div>}
+    {
+      guestbookData?.submissions.map((submission) => (
+        <GuestbookEntry {...submission} />
+      ))
+    }
+    {
+      Astro.locals.loggedInClient && (
+        <form method="POST" action={actions.postToGuestbook}>
+          <input name="text" type="text" placeholder="your text" />
+          <input
+            name="postedTo"
+            value={guestbookAtUri.toString()}
+            type="hidden"
+          />
 
-            <button type="submit">Submit</button>
-            {result?.error && <p class="error">{result.error.message}</p>}
-            {result?.data && <div>{result.data}</div>}
-          </form>
-        )
-      }
-    </div>
-  </body>
-</html>
+          <button type="submit">Submit</button>
+          {result?.error && <p class="error">{result.error.message}</p>}
+          {result?.data && <div>{result.data}</div>}
+        </form>
+      )
+    }
+  </div>
+</Layout>
 
 <style>
-  img {
-    width: 100px;
-    height: auto;
+  h1 {
+    margin-bottom: 10px;
+  }
+  .submissions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
   }
 </style>
 
