@@ -198,15 +198,17 @@ Good luck!
 
 ### Astro Client
 
-- [ ] Style the guestbook page
+- [x] Style the guestbook page
 - [ ] Make the write submission form nicer
 - [ ] Make our login look nice
   - [ ] Inform user that they are logged in
   - [ ] Allow users to use their handle and not just DID
   - [ ] Allow users to log out
+- [ ] Make the styles decent
 - [x] Allow creating guestbooks
 - [x] Allow listing guestbooks of a user
-- [ ] Move Astro-based client to client directory
+- [x] Move Astro-based client to client directory
+- [ ] Re-add authentication to the client
 
 #### HTML iframe Client
 
