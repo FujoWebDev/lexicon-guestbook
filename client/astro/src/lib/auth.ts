@@ -79,11 +79,6 @@ const createClient = async (domain: string) => {
   });
   const IS_DEVELOPMENT = import.meta.env.DEV;
 
-  console.log(
-    IS_DEVELOPMENT
-      ? `http://localhost?${LOCAL_SEARCH_PARAMS.toString()}`
-      : new URL("/client-metadata.json", domain).toString()
-  );
   return new NodeOAuthClient({
     clientMetadata: {
       client_name: "ATProto Guestbook",
@@ -182,7 +177,6 @@ const DOMAIN = process.env.EXTERNAL_DOMAIN ?? "http://127.0.0.1:4321/";
 export const oauthClient = await createClient(DOMAIN);
 
 export const getLoggedInClient = async (cookies: AstroCookies) => {
-  console.log(cookies);
   const sessionToken = cookies.get("session");
   if (sessionToken) {
     const { session } = await validateSessionToken(sessionToken.value);

@@ -3,7 +3,7 @@ import { z } from "astro:schema";
 
 import { encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-import { oauthClient } from "../lib/auth";
+import { getLoggedInClient, oauthClient } from "../lib/auth";
 
 export const actions = {
   login: defineAction({
@@ -33,6 +33,11 @@ export const actions = {
   }),
   logout: defineAction({
     accept: "form",
-    handler: () => {},
+    handler: async (_input, context) => {
+      const loggedInClient = await getLoggedInClient(context.cookies);
+      await loggedInClient?.signOut();
+
+      return {};
+    },
   }),
 };

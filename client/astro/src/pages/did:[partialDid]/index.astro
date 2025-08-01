@@ -6,6 +6,7 @@ const { partialDid } = Astro.params;
 import { AtUri } from "@atproto/syntax";
 import CreateGuestbookForm from "../../../components/CreateGuestbookForm.astro";
 import { getGuestbookAgent, didToHandle } from "../../lib/atproto";
+import Layout from "../../../layouts/Layout.astro";
 
 const ownerDid = "did:" + partialDid;
 const ownerHandle = await didToHandle(ownerDid);
@@ -20,33 +21,35 @@ if (!guestbooks.success) {
 }
 ---
 
-<div>
-  <h2>
-    @{ownerHandle}'s Guestbooks! (<a href={`https://pdsls.dev/at/${ownerDid}`}
-      >pdsls</a
-    >)
-  </h2>
-  <ul>
-    {
-      guestbooks.data.guestbooks.map((guestbook) => {
-        const guestbookAtUri = new AtUri(guestbook.atUri);
-        return (
-          <li>
-            <div>
-              <a
-                href={`guestbook/${ownerDid}/${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
-              >
-                {guestbook.title ??
-                  `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
-              </a>
-              (submissions: {guestbook.submissionsCount ?? "N/A"})
-            </div>
-            <div style="color:gray; font-size:smaller">{guestbook.atUri}</div>
-          </li>
-        );
-      })
-    }
-  </ul>
-  <!-- <h3>Create new guestbook</h3>
+<Layout>
+  <div>
+    <h2>
+      @{ownerHandle}'s Guestbooks! (<a href={`https://pdsls.dev/at/${ownerDid}`}
+        >pdsls</a
+      >)
+    </h2>
+    <ul>
+      {
+        guestbooks.data.guestbooks.map((guestbook) => {
+          const guestbookAtUri = new AtUri(guestbook.atUri);
+          return (
+            <li>
+              <div>
+                <a
+                  href={`guestbook/${ownerDid}/${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+                >
+                  {guestbook.title ??
+                    `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+                </a>
+                (submissions: {guestbook.submissionsCount ?? "N/A"})
+              </div>
+              <div style="color:gray; font-size:smaller">{guestbook.atUri}</div>
+            </li>
+          );
+        })
+      }
+    </ul>
+    <!-- <h3>Create new guestbook</h3>
   <CreateGuestbookForm /> -->
-</div>
+  </div>
+</Layout>

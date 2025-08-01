@@ -1,7 +1,7 @@
 ---
 import { actions } from "astro:actions";
 
-const { data, error } = Astro.getActionResult(actions.login) ?? {};
+const { error } = Astro.getActionResult(actions.login) ?? {};
 ---
 
 <form action={actions.login} method="POST">
