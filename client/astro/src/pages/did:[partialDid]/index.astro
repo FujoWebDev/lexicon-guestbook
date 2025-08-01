@@ -10,10 +10,10 @@ import { getGuestbookAgent, didToHandle } from "../../lib/atproto";
 const ownerDid = "did:" + partialDid;
 const ownerHandle = await didToHandle(ownerDid);
 
-const guestbooks =
-  await getGuestbookAgent().com.fujocoded.guestbook.getGuestbooks({
-    ownerDid,
-  });
+const guestbookAgent = await getGuestbookAgent(Astro.cookies);
+const guestbooks = await guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
+  ownerDid,
+});
 
 if (!guestbooks.success) {
   throw new Error(`There was an error fetching the data for ${ownerDid}`);

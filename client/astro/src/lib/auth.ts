@@ -1,20 +1,20 @@
 import {
   NodeOAuthClient,
-  NodeSavedStateStore,
-  NodeSavedSession,
-  NodeSavedSessionStore,
-  NodeSavedState,
+  type NodeSavedStateStore,
+  type NodeSavedSession,
+  type NodeSavedSessionStore,
+  type NodeSavedState,
 } from "@atproto/oauth-client-node";
 import { JoseKey } from "@atproto/jwk-jose";
 import { AuthSession, BskyAuthSession, BskyAuthState } from "../db/schema.js";
-import { eq, InferSelectModel } from "drizzle-orm";
+import { eq, type InferSelectModel } from "drizzle-orm";
 import { db } from "../db/index.js";
 import {
   encodeBase32LowerCaseNoPadding,
   encodeHexLowerCase,
 } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-import { Request, Response } from "express";
+import type { AstroCookies } from "astro";
 
 const ALLOWED_SCOPES = "atproto transition:generic";
 const REDIRECT_PATH = "/oauth/callback";
@@ -70,32 +70,35 @@ export class SessionStore implements NodeSavedSessionStore {
 }
 
 const createClient = async (domain: string) => {
-  const publicUrl = `https://${domain}`;
-
   // In local clients configuration for allowed scopes and redirects
   // is done through search params
   // See: https://atproto.com/specs/oauth#clients
   const LOCAL_SEARCH_PARAMS = new URLSearchParams({
     scope: ALLOWED_SCOPES,
-    redirect_uri: new URL(REDIRECT_PATH, publicUrl).toString(),
+    redirect_uri: new URL(REDIRECT_PATH, domain).toString(),
   });
-  const IS_DEVELOPMENT = process.env.NODE_ENV == "development";
+  const IS_DEVELOPMENT = import.meta.env.DEV;
 
+  console.log(
+    IS_DEVELOPMENT
+      ? `http://localhost?${LOCAL_SEARCH_PARAMS.toString()}`
+      : new URL("/client-metadata.json", domain).toString()
+  );
   return new NodeOAuthClient({
     clientMetadata: {
       client_name: "ATProto Guestbook",
       client_id: IS_DEVELOPMENT
         ? `http://localhost?${LOCAL_SEARCH_PARAMS.toString()}`
-        : new URL("/client-metadata.json", publicUrl).toString(),
-      client_uri: publicUrl,
-      redirect_uris: [new URL(REDIRECT_PATH, publicUrl).toString()],
+        : new URL("/client-metadata.json", domain).toString(),
+      client_uri: domain,
+      redirect_uris: [new URL(REDIRECT_PATH, domain).toString()],
       scope: ALLOWED_SCOPES,
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
       application_type: "web",
       token_endpoint_auth_method: "none",
       dpop_bound_access_tokens: true,
-      jwks_uri: new URL("/jwks.json", publicUrl).toString(),
+      jwks_uri: new URL("/jwks.json", domain).toString(),
     },
     keyset: await Promise.all([JoseKey.generate()]),
     stateStore: new StateStore(),
@@ -158,11 +161,11 @@ export type SessionValidationResult = {
 };
 
 export function setSessionTokenCookie(
-  res: Response,
+  cookie: AstroCookies,
   token: string,
   expiresAt: number
 ): void {
-  res.cookie("session", token, {
+  cookie.set("session", token, {
     httpOnly: true,
     sameSite: "lax",
     secure: true,
@@ -171,28 +174,29 @@ export function setSessionTokenCookie(
   });
 }
 
-export function deleteSessionTokenCookie(res: Response): void {
-  res.clearCookie("session");
+export function deleteSessionTokenCookie(cookie: AstroCookies): void {
+  cookie.delete("session");
 }
 
-const DOMAIN = process.env.APPVIEW_DOMAIN ?? "worktop.tail2ad46.ts.net";
+const DOMAIN = process.env.EXTERNAL_DOMAIN ?? "http://127.0.0.1:4321/";
 export const oauthClient = await createClient(DOMAIN);
 
-export const getLoggedInClient = async (req: Request, res: Response) => {
-  const sessionToken = req.cookies.session;
+export const getLoggedInClient = async (cookies: AstroCookies) => {
+  console.log(cookies);
+  const sessionToken = cookies.get("session");
   if (sessionToken) {
-    const { session } = await validateSessionToken(sessionToken);
+    const { session } = await validateSessionToken(sessionToken.value);
     if (session == null) {
-      deleteSessionTokenCookie(res);
+      deleteSessionTokenCookie(cookies);
     } else {
       // Check that the BlueSky session is valid
       try {
         const client = await oauthClient.restore(session.userDid!);
-        setSessionTokenCookie(res, sessionToken, session.expiresAt!);
+        setSessionTokenCookie(cookies, sessionToken.value, session.expiresAt!);
         return client;
       } catch (e) {
         // The session is valid but the oauthToken for BSky has expired.
-        deleteSessionTokenCookie(res);
+        deleteSessionTokenCookie(cookies);
       }
     }
   }

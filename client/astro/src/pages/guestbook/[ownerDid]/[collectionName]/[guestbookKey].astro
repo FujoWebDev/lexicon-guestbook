@@ -11,13 +11,14 @@ import Layout from "../../../../../layouts/Layout.astro";
 
 const guestbookAtUri = AtUri.make(ownerDid, collectionName, guestbookKey);
 
+const guestbookAgent = await getGuestbookAgent(Astro.cookies);
 const guestbookResponse =
   // The guestbook agent is our authenticated client that knows how to fetch
   // data for our guestbook from an AppView that implements the fujocoded
   // guestbook data-fetching endpoints.
   // In this case, we use the "com.fujocoded.guestbook.getGuestbook" method
   // to get the guestbook data, passing its AtUri as a parameter.
-  await getGuestbookAgent().com.fujocoded.guestbook.getGuestbook({
+  await guestbookAgent.com.fujocoded.guestbook.getGuestbook({
     guestbookAtUri: guestbookAtUri.toString(),
   });
 

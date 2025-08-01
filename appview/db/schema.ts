@@ -43,22 +43,6 @@ export const submissions = sqliteTable(
   (t) => [unique().on(t.author, t.collection, t.recordKey)]
 );
 
-export const BskyAuthSession = sqliteTable("BskyAuthSession", {
-  key: text().primaryKey(),
-  session: text(),
-});
-
-export const BskyAuthState = sqliteTable("BskyAuthState", {
-  key: text().primaryKey(),
-  state: text(),
-});
-
-export const AuthSession = sqliteTable("AuthSession", {
-  id: text().primaryKey(),
-  userDid: text(),
-  expiresAt: int(),
-});
-
 export const Cursor = sqliteTable("cursor", {
   id: int().primaryKey(),
   cursor: int().notNull(),

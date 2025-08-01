@@ -1,8 +1,11 @@
-<form
-  action={`https://${Astro.locals.appviewDomain}/oauth/authorize`}
-  method="GET"
->
-  <input name="did" value="did:plc:r2vpg2iszskbkegoldmqa322" />
+---
+import { actions } from "astro:actions";
 
+const { data, error } = Astro.getActionResult(actions.login) ?? {};
+---
+
+<form action={actions.login} method="POST">
+  <input name="did" value="did:plc:r2vpg2iszskbkegoldmqa322" />
   <button type="submit">Submit</button>
+  {error && <div>{error.message}</div>}
 </form>
