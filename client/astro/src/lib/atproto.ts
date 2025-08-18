@@ -1,14 +1,13 @@
-import type { AstroCookies } from "astro";
-import { AtpBaseClient } from "../../../../client/generated/api/index";
+import type { APIContext } from "astro";
+import { AtpBaseClient as GuestbookClient } from "../../../../client/generated/api/index";
 import { DidResolver } from "@atproto/identity";
-import { getLoggedInClient } from "./auth";
 
 const APPVIEW_DOMAIN = process.env.APPVIEW_DOMAIN ?? "worktop.tail2ad46.ts.net";
-export const getGuestbookAgent = async (cookies: AstroCookies) => {
-  const loggedInClient = await getLoggedInClient(cookies);
-  const guestbookAgent = new AtpBaseClient(
-    loggedInClient
-      ? loggedInClient.fetchHandler.bind(loggedInClient)
+
+export const getGuestbookAgent = async (locals: APIContext["locals"]) => {
+  const guestbookAgent = new GuestbookClient(
+    locals.loggedInUser
+      ? locals.loggedInUser.fetchHandler
       : { service: `https://${APPVIEW_DOMAIN}` }
   );
   guestbookAgent.setHeader(

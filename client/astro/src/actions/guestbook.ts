@@ -11,11 +11,11 @@ export const actions = {
       postedTo: z.string(),
     }),
     handler: async (input, context) => {
-      const guestbookAgent = await getGuestbookAgent(context.cookies);
+      const guestbookAgent = await getGuestbookAgent(context.locals);
       const result =
         await guestbookAgent.com.fujocoded.guestbook.submission.create(
           {
-            repo: context.locals.loggedInClient!.did,
+            repo: context.locals.loggedInUser.did,
           },
           {
             createdAt: new Date().toISOString(),
@@ -30,14 +30,14 @@ export const actions = {
   createGuestbook: defineAction({
     accept: "form",
     input: z.object({
-      key: z.string().min(3).max(10),
+      key: z.string().min(3).max(30),
       title: z.string().max(200),
     }),
     handler: async (input, context) => {
-      const guestbookAgent = await getGuestbookAgent(context.cookies);
+      const guestbookAgent = await getGuestbookAgent(context.locals);
       const data = await guestbookAgent.com.fujocoded.guestbook.book.create(
         {
-          repo: context.locals.loggedInClient.did,
+          repo: context.locals.loggedInUser.did,
           rkey: input.key,
         },
         {

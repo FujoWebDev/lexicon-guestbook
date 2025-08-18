@@ -11,7 +11,7 @@ import Layout from "../../../../../layouts/Layout.astro";
 
 const guestbookAtUri = AtUri.make(ownerDid, collectionName, guestbookKey);
 
-const guestbookAgent = await getGuestbookAgent(Astro.cookies);
+const guestbookAgent = await getGuestbookAgent(Astro.locals);
 const guestbookResponse =
   // The guestbook agent is our authenticated client that knows how to fetch
   // data for our guestbook from an AppView that implements the fujocoded
@@ -45,7 +45,7 @@ const result = Astro.getActionResult(actions.postToGuestbook);
       ))
     }
     {
-      Astro.locals.loggedInClient && (
+      Astro.locals.loggedInUser && (
         <form method="POST" action={actions.postToGuestbook}>
           <input name="text" type="text" placeholder="your text" />
           <input

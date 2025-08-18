@@ -1,5 +1,18 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+
+const loggedInUser = Astro.locals.loggedInUser;
+
+if (loggedInUser?.did) {
+  return Astro.redirect(`/${loggedInUser.did}`);
+}
 ---
 
-<Layout> Welcome to our Guestbook site! </Layout>
+<Layout>
+  Welcome to our Guestbook site!
+  {
+    loggedInUser?.handle && (
+      <div>You're logged in as {loggedInUser?.handle}</div>
+    )
+  }
+</Layout>

@@ -146,8 +146,16 @@ IMPORTANT: To make the AppView work, it needs to be reachable from the external
 internet at a specific address. If you have tailscale, you can use serve/funnel
 to create this address. You can also use ngrok, or cloudflare tunnels.
 
+OLD TAILSCALE:
+
 1. Run `tailscale serve https / http://localhost:3003/`
 2. Run `tailscale funnel 443 on`
+3. Run `tailscale serve status` and use the address from the funnel
+
+NEW TAILSCALE:
+
+1. Run `tailscale serve --bg http://localhost:3003`
+2. Run `tailscale funnel --bg 3003`
 3. Run `tailscale serve status` and use the address from the funnel
 
 #### Configure the public address of your AppView server
@@ -195,7 +203,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Improve HTML generation
 - [ ] Accept guestbook submissions from HTML iframes
 - [ ] Check out CORS
-- [ ] Allow creating guestbooks
+- [x] Allow creating guestbooks
 
 ### CLI Client
 
@@ -208,15 +216,15 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 - [x] Style the guestbook page
 - [ ] Make the write submission form nicer
-- [ ] Make our login look nice
-  - [ ] Inform user that they are logged in
-  - [ ] Allow users to use their handle and not just DID
-  - [ ] Allow users to log out
+- [x] Make our login look nice
+  - [x] Inform user that they are logged in
+  - [x] Allow users to use their handle and not just DID
+  - [x] Allow users to log out
 - [ ] Make the styles decent
 - [x] Allow creating guestbooks
 - [x] Allow listing guestbooks of a user
 - [x] Move Astro-based client to client directory
-- [ ] Re-add authentication to the client
+- [x] Re-add authentication to the client
 
 #### HTML iframe Client
 

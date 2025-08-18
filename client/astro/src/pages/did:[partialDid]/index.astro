@@ -5,13 +5,13 @@
 const { partialDid } = Astro.params;
 import { AtUri } from "@atproto/syntax";
 import CreateGuestbookForm from "../../../components/CreateGuestbookForm.astro";
-import { getGuestbookAgent, didToHandle } from "../../lib/atproto";
+import { didToHandle, getGuestbookAgent } from "../../lib/atproto";
 import Layout from "../../../layouts/Layout.astro";
 
 const ownerDid = "did:" + partialDid;
 const ownerHandle = await didToHandle(ownerDid);
 
-const guestbookAgent = await getGuestbookAgent(Astro.cookies);
+const guestbookAgent = await getGuestbookAgent(Astro.locals);
 const guestbooks = await guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
   ownerDid,
 });
@@ -49,7 +49,7 @@ if (!guestbooks.success) {
         })
       }
     </ul>
-    <!-- <h3>Create new guestbook</h3>
-  <CreateGuestbookForm /> -->
+    <h3>Create new guestbook</h3>
+    <CreateGuestbookForm />
   </div>
 </Layout>
