@@ -1,23 +1,24 @@
 ---
 import type { SubmissionView } from "../../generated/api/types/com/fujocoded/guestbook/defs";
+import { actions } from "astro:actions";
 
 interface Props extends SubmissionView {}
 
-const { author, text, createdAt } = Astro.props;
+const { author, text, createdAt, atUri } = Astro.props;
 
+const result = Astro.getActionResult(actions.deletePost);
+console.log(result);
 const authorLink = author.handle
   ? author.handle
   : `https://pdsls.dev/at/${author.did}`;
 ---
 
 <article>
-  <div>
-    <img src={author.avatar} />
-    <span>
-      <a class="author" href={authorLink}>@{author.handle ?? author.did}</a>
-      says:</span
-    >
-  </div>
+  <img src={author.avatar} />
+  <span>
+    <a class="author" href={authorLink}>@{author.handle ?? author.did}</a>
+    says:</span
+  >
   <p class="text">{text}</p>
   <datetime>
     {
@@ -27,36 +28,47 @@ const authorLink = author.handle
       })
     }
   </datetime>
-</article>
+  {
+    Astro.locals.loggedInUser && (
+      <div>
+        <form method="POST" action={actions.deletePost}>
+          <input name="atUri" type="hidden" value={atUri} />
+          <button type="submit">Delete entry</button>
+        </form>
+        {result?.error && <p class="error">{result.error.message}</p>}
+      </div>
+    )
+  }
 
-<style>
-  article {
-    background-color: #a2e3c3;
-    padding-inline: 2rem;
-    padding-block: 1rem;
-    border-radius: 1.6rem;
-    display: flex;
-    flex-direction: column;
-  }
-  img {
-    width: 2.5rem;
-    height: auto;
-    border-radius: 100%;
-  }
-  div:has(span > .author) {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-  p {
-    padding-block: 1rem;
-    padding-inline: 2rem;
-    background-color: hsl(150 54% 83% / 1);
-    border-radius: 1rem;
-  }
-  datetime {
-    display: block;
-    text-align: right;
-    font-size: 1rem;
-  }
-</style>
+  <style>
+    article {
+      background-color: #a2e3c3;
+      padding-inline: 2rem;
+      padding-block: 1rem;
+      border-radius: 1.6rem;
+      display: flex;
+      flex-direction: column;
+    }
+    img {
+      width: 2.5rem;
+      height: auto;
+      border-radius: 100%;
+    }
+    div:has(span > .author) {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    p {
+      padding-block: 1rem;
+      padding-inline: 2rem;
+      background-color: hsl(150 54% 83% / 1);
+      border-radius: 1rem;
+    }
+    datetime {
+      display: block;
+      text-align: right;
+      font-size: 1rem;
+    }
+  </style>
+</article>

@@ -1,6 +1,8 @@
-import { defineAction } from "astro:actions";
+import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { AtUri } from "@atproto/api";
 import { getGuestbookAgent } from "../lib/atproto";
+import { AstroError } from "astro/errors";
 
 export const actions = {
   postToGuestbook: defineAction({
@@ -45,6 +47,39 @@ export const actions = {
         }
       );
 
+      return data;
+    },
+  }),
+  deletePost: defineAction({
+    accept: "form",
+    input: z.object({
+      atUri: z.string(),
+    }),
+    handler: async (input, context) => {
+      const guestbookAgent = await getGuestbookAgent(context.locals);
+      const { rkey, host } = new AtUri(input.atUri);
+
+      if (!context.locals.loggedInUser) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to delete a post",
+        });
+      }
+
+      if (context.locals.loggedInUser.did !== host) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "You can only delete your own posts.",
+        });
+      }
+
+      const data = await guestbookAgent.com.fujocoded.guestbook.book.delete({
+        // repo: context.locals.loggedInUser.did,
+        repo: host,
+        rkey,
+      });
+
+      console.log(data);
       return data;
     },
   }),
