@@ -73,11 +73,15 @@ export const actions = {
         });
       }
 
-      const data = await guestbookAgent.com.fujocoded.guestbook.book.delete({
-        // repo: context.locals.loggedInUser.did,
-        repo: host,
-        rkey,
-      });
+      // TODO: check if the record exists before deleting if you want
+      // to warn the user in case of error
+      console.log(input.atUri);
+      const data =
+        await guestbookAgent.com.fujocoded.guestbook.submission.delete({
+          // repo: context.locals.loggedInUser.did,
+          repo: host,
+          rkey,
+        });
 
       console.log(data);
       return data;

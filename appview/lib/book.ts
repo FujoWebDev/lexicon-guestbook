@@ -3,14 +3,14 @@ import { type Record as Book } from "../../client/generated/api/types/com/fujoco
 import { db } from "../db/index.js";
 import { guestbooks, submissions, users } from "../db/schema.js";
 import { eq, getTableColumns, and } from "drizzle-orm";
-import { resolveBskyUserProfiles, upsertUser } from "./user.js";
+import { resolveBskyUserProfiles, createOrGetUser } from "./user.js";
 
 export const handleBookEvent = async (
   params: { book: Book; author: string; recordKey: string },
   eventType: "create" | "update" | "delete"
 ) => {
   if (eventType == "create") {
-    const user = await upsertUser({ did: params.author });
+    const user = await createOrGetUser({ did: params.author });
     await db
       .insert(guestbooks)
       .values({
@@ -76,6 +76,7 @@ export const getGuestbook = async ({
   ]);
 
   return {
+    id: guestbookEntries[0].id,
     title: guestbookEntries[0].title || undefined,
     owner: {
       did: guestbookEntries[0].ownerDid,

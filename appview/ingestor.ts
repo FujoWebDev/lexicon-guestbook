@@ -156,9 +156,22 @@ ws.on("message", async (data) => {
     // TODO: handle deleting things
     console.log("Delete operation:");
     console.dir(eventData, { depth: null });
+    if (
+      isSubmissionRecord({
+        $type: eventData.commit.collection,
+      })
+    ) {
+      await handleSubmissionEvent(
+        {
+          submission: undefined,
+          submissionAuthor: eventData.did,
+          submissionRecordKey: eventData.commit.rkey,
+        },
+        "delete"
+      );
+    }
     return;
   }
-
   // Check if this event is related to an actual guestbook
   if (isBookRecord(eventData.commit.record)) {
     await handleBookEvent(
@@ -178,9 +191,9 @@ ws.on("message", async (data) => {
   if (isSubmissionRecord(eventData.commit.record)) {
     await handleSubmissionEvent(
       {
-        recordKey: eventData.commit.rkey,
+        submissionRecordKey: eventData.commit.rkey,
         submission: eventData.commit.record,
-        author: eventData.did,
+        submissionAuthor: eventData.did,
       },
       eventData.commit.operation
     );

@@ -4,7 +4,7 @@ import { users } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { DidResolver } from "@atproto/identity";
 
-export const upsertUser = async ({ did }: { did: string }) => {
+export const createOrGetUser = async ({ did }: { did: string }) => {
   const user = (
     await db.select().from(users).where(eq(users.did, did)).execute()
   )?.[0];

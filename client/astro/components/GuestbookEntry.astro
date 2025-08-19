@@ -20,6 +20,7 @@ const authorLink = author.handle
     says:</span
   >
   <p class="text">{text}</p>
+  <div class="aturi">{atUri}</div>
   <datetime>
     {
       new Date(createdAt).toLocaleString(undefined, {
@@ -29,7 +30,7 @@ const authorLink = author.handle
     }
   </datetime>
   {
-    Astro.locals.loggedInUser && (
+    Astro.locals.loggedInUser?.did === author.did && (
       <div>
         <form method="POST" action={actions.deletePost}>
           <input name="atUri" type="hidden" value={atUri} />
@@ -69,6 +70,10 @@ const authorLink = author.handle
       display: block;
       text-align: right;
       font-size: 1rem;
+    }
+    .aturi {
+      font-size: small;
+      color: gray;
     }
   </style>
 </article>

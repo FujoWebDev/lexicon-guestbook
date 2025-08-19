@@ -190,7 +190,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 ### Lexicon
 
-- [ ] Allow guestbooks moderation (e.g. delete entry)
+- [ ] Allow guestbooks moderation (e.g. hide entry)
 - [ ] Allow blocking users
 - [ ] Allow restricting which URLs a guestbook is displayable on
 
@@ -204,6 +204,9 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [ ] Accept guestbook submissions from HTML iframes
 - [ ] Check out CORS
 - [x] Allow creating guestbooks
+- [ ] Save user profile info to database
+- [x] Handle deletions of submissions
+- [ ] Handle deletions of guestbooks
 
 ### CLI Client
 
@@ -225,6 +228,8 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Allow listing guestbooks of a user
 - [x] Move Astro-based client to client directory
 - [x] Re-add authentication to the client
+- [x] Handle deletions of submissions
+- [ ] Handle deletions of guestbooks
 
 #### HTML iframe Client
 
@@ -240,4 +245,5 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Catch up with cursor
 - [ ] Change timing of cursor save to consider all operations
 - [ ] Handle identity/account events
-- [ ] Handle deletions
+- [x] Handle deletions of submissions
+- [ ] Handle deletions of guestbooks
