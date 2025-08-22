@@ -41,7 +41,7 @@ const result = Astro.getActionResult(actions.postToGuestbook);
     {!guestbookData?.submissions.length && <div>This guestbook is empty.</div>}
     {
       guestbookData?.submissions.map((submission) => (
-        <GuestbookEntry {...submission} />
+        <GuestbookEntry {...submission} guestbookAtUri={guestbookAtUri} />
       ))
     }
     {

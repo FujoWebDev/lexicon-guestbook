@@ -16,6 +16,10 @@ import {
   type Record as Submission,
   isRecord as isSubmission,
 } from "../client/generated/api/types/com/fujocoded/guestbook/submission.js";
+import {
+  type Record as Gate,
+  isRecord as isGate,
+} from "../client/generated/api/types/com/fujocoded/guestbook/gate.js";
 import { z } from "zod";
 import { handleBookEvent } from "./lib/book.js";
 import { handleSubmissionEvent } from "./lib/submission.js";
@@ -23,6 +27,7 @@ import { db } from "./db/index.js";
 import { Cursor } from "./db/schema.js";
 import { eq } from "drizzle-orm";
 import { cursorToDate, getLastCursor, updateCursor } from "./lib/cursor.js";
+import { handleGateEvent } from "./lib/gate.js";
 
 const CommitEventSchema = z.object({
   did: z.string(),
@@ -54,6 +59,7 @@ type CommitEvent = z.infer<typeof CommitEventSchema>;
 const isBookRecord = (record: unknown): record is Book => isBook(record);
 const isSubmissionRecord = (record: unknown): record is Submission =>
   isSubmission(record);
+const isGateRecord = (record: unknown): record is Gate => isGate(record);
 
 // To listen to the guestbook events in the ATmosphere we subscribe to a
 // Jetstream service using the websocket protocol (wss://).
@@ -202,7 +208,18 @@ ws.on("message", async (data) => {
     );
   }
 
-  // console.error(`Unknown record type: ${eventData.commit.record.$type}`);
+  if (isGateRecord(eventData.commit.record)) {
+    await handleGateEvent(
+      {
+        name: eventData.commit.rkey,
+        content: eventData.commit.record,
+        owner: eventData.did,
+      },
+      eventData.commit.operation
+    );
+  }
+
+  console.error(`Unknown record type: ${eventData.commit.record.$type}`);
 });
 
 ws.on("error", (err) => {

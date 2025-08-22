@@ -1,16 +1,24 @@
 ---
+import type { AtUri } from "@atproto/api";
 import type { SubmissionView } from "../../generated/api/types/com/fujocoded/guestbook/defs";
 import { actions } from "astro:actions";
 
-interface Props extends SubmissionView {}
+interface Props extends SubmissionView {
+  guestbookAtUri: AtUri;
+}
 
-const { author, text, createdAt, atUri } = Astro.props;
+const { author, text, createdAt, atUri, guestbookAtUri } = Astro.props;
 
-const result = Astro.getActionResult(actions.deletePost);
-console.log(result);
+const loggedInUserDid = Astro.locals.loggedInUser?.did;
 const authorLink = author.handle
   ? author.handle
   : `https://pdsls.dev/at/${author.did}`;
+
+const deleteSubmissionResult = Astro.getActionResult(actions.deleteSubmission);
+const hideSubmissionResult = Astro.getActionResult(actions.hideSubmission);
+
+const body = await Astro.request.clone().formData();
+const actionSubmissionAtUri = body.get("atUri").valueOf();
 ---
 
 <article>
@@ -30,13 +38,33 @@ const authorLink = author.handle
     }
   </datetime>
   {
-    Astro.locals.loggedInUser?.did === author.did && (
+    loggedInUserDid === author.did && (
       <div>
-        <form method="POST" action={actions.deletePost}>
+        <form method="POST" action={actions.deleteSubmission}>
           <input name="atUri" type="hidden" value={atUri} />
           <button type="submit">Delete entry</button>
         </form>
-        {result?.error && <p class="error">{result.error.message}</p>}
+        {actionSubmissionAtUri == atUri && deleteSubmissionResult?.error && (
+          <p class="error">{deleteSubmissionResult.error.message}</p>
+        )}
+      </div>
+    )
+  }
+  {
+    loggedInUserDid && loggedInUserDid !== author.did && (
+      <div>
+        <form method="POST" action={actions.hideSubmission}>
+          <input name="atUri" type="hidden" value={atUri} />
+          <input
+            name="guestbookAtUri"
+            type="hidden"
+            value={guestbookAtUri.toString()}
+          />
+          <button type="submit">Hide entry</button>
+        </form>
+        {actionSubmissionAtUri == atUri && hideSubmissionResult?.error && (
+          <p class="error">{hideSubmissionResult.error.message}</p>
+        )}
       </div>
     )
   }

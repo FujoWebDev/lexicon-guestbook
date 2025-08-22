@@ -1,0 +1,41 @@
+{
+  "lexicon": 1,
+  "id": "com.fujocoded.guestbook.gate",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "record-key",
+      "description": "Record defining interaction rules for one or more guestbooks. The default key is used for rules applicable to all guestbooks. Users can define additional keys for custom sets of rules and map them to one or more guestbooks.",
+      "record": {
+        "type": "object",
+        "properties": {
+          "hiddenSubmissions": {
+            "type": "array",
+            "items": {
+              "type": "ref",
+              "ref": "#hiddenSubmission"
+            },
+            "description": "List of submissions this user has hidden from their guestbooks."
+          }
+        }
+      }
+    },
+    "hiddenSubmission": {
+      "type": "object",
+      "description": "A submission that's hidden by this user.",
+      "required": ["submissionUri"],
+      "properties": {
+        "hiddenAt": { "type": "string", "format": "datetime" },
+        "originallyPostedOn": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "Reference (AT-URI) to the original submission guestbook."
+        },
+        "submissionUri": {
+          "type": "string",
+          "format": "at-uri"
+        }
+      }
+    }
+  }
+}

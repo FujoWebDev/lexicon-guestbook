@@ -1,4 +1,11 @@
-import { index, int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  int,
+  integer,
+  sqliteTable,
+  text,
+  unique,
+} from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable(
   "user",
@@ -42,6 +49,17 @@ export const submissions = sqliteTable(
   },
   (t) => [unique().on(t.author, t.collection, t.recordKey)]
 );
+
+export const hiddenSubmissions = sqliteTable("hidden_submission", {
+  id: int().primaryKey({ autoIncrement: true }),
+  submissionId: int()
+    .notNull()
+    .references(() => submissions.id),
+  hiddenBy: int()
+    .notNull()
+    .references(() => users.id),
+  hiddenAt: int({ mode: "timestamp" }),
+});
 
 export const Cursor = sqliteTable("cursor", {
   id: int().primaryKey(),
