@@ -190,7 +190,8 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 ### Lexicon
 
-- [ ] Allow guestbooks moderation (e.g. hide entry)
+- [x] Allow hiding guestbook submissions
+- [ ] Return information on submissions visibility in queries
 - [ ] Allow blocking users
 - [ ] Allow restricting which URLs a guestbook is displayable on
 
@@ -204,9 +205,9 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [ ] Accept guestbook submissions from HTML iframes
 - [ ] Check out CORS
 - [x] Allow creating guestbooks
-- [ ] Save user profile info to database
 - [x] Handle deletions of submissions
 - [ ] Handle deletions of guestbooks
+- [ ] Return information on submissions visibility in queries
 
 ### CLI Client
 
@@ -219,17 +220,20 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 - [x] Style the guestbook page
 - [ ] Make the write submission form nicer
+- [ ] Make overall styles decent
 - [x] Make our login look nice
   - [x] Inform user that they are logged in
   - [x] Allow users to use their handle and not just DID
   - [x] Allow users to log out
-- [ ] Make the styles decent
+  - [ ] Redirect to right port on login
 - [x] Allow creating guestbooks
 - [x] Allow listing guestbooks of a user
 - [x] Move Astro-based client to client directory
 - [x] Re-add authentication to the client
-- [x] Handle deletions of submissions
-- [ ] Handle deletions of guestbooks
+- [x] Allow deletions of submissions
+- [ ] Allow deletions of guestbooks
+- [ ] Hide hidden submissions when logged out
+- [ ] Show which submissions are hidden to a logged in user
 
 #### HTML iframe Client
 
@@ -247,3 +251,6 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [ ] Handle identity/account events
 - [x] Handle deletions of submissions
 - [ ] Handle deletions of guestbooks
+- [ ] Push new database schema for hidden submissions
+- [ ] Make sure hiding submissions work
+- [ ] Handle deletion of gates
