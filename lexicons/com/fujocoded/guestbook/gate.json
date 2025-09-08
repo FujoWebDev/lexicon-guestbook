@@ -16,6 +16,13 @@
               "ref": "#hiddenSubmission"
             },
             "description": "List of submissions this user has hidden from their guestbooks."
+          },
+          "blockedUsers": {
+            "type": "array",
+            "items": {
+              "type": "ref",
+              "ref": "#blockedUser"
+            }
           }
         }
       }
@@ -34,6 +41,18 @@
         "submissionUri": {
           "type": "string",
           "format": "at-uri"
+        }
+      }
+    },
+    "blockedUser": {
+      "type": "object",
+      "description": "A user that's blocked from posting on this PDS's guestbooks.",
+      "required": ["userDid"],
+      "properties": {
+        "hiddenAt": { "type": "string", "format": "datetime" },
+        "userDid": {
+          "type": "string",
+          "format": "did"
         }
       }
     }

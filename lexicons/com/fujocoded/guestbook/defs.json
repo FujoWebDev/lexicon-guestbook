@@ -64,6 +64,11 @@
         "author": {
           "type": "ref",
           "ref": "#profileView"
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": "false",
+          "description": "If the requesting user is the owner of the guestbook, we also return hidden submissions."
         }
       }
     },

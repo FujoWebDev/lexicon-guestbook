@@ -12,6 +12,11 @@
           "guestbookAtUri": {
             "type": "string",
             "format": "at-uri"
+          },
+          "showHidden": {
+            "type": "boolean",
+            "default": "false",
+            "description": "If the user is the owner of the guestbook, ask to also return hidden submissions."
           }
         }
       },
