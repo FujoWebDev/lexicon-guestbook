@@ -1,7 +1,12 @@
 import { alias } from "drizzle-orm/sqlite-core";
 import { type Record as Book } from "../../client/generated/api/types/com/fujocoded/guestbook/book.js";
 import { db } from "../db/index.js";
-import { guestbooks, submissions, users } from "../db/schema.js";
+import {
+  guestbooks,
+  hiddenSubmissions,
+  submissions,
+  users,
+} from "../db/schema.js";
 import { eq, getTableColumns, and } from "drizzle-orm";
 import { resolveBskyUserProfiles, createOrGetUser } from "./user.js";
 
@@ -55,11 +60,16 @@ export const getGuestbook = async ({
       ownerDid: users.did,
       submissions: submissions,
       submissionAuthor: authors,
+      hiddenSubmissions: hiddenSubmissions,
     })
     .from(guestbooks)
     .innerJoin(users, eq(users.id, guestbooks.owner))
     .leftJoin(submissions, eq(submissions.postedTo, guestbooks.id))
     .leftJoin(authors, eq(submissions.author, authors.id))
+    .leftJoin(
+      hiddenSubmissions,
+      eq(submissions.id, hiddenSubmissions.submissionId)
+    )
     .where(
       and(eq(guestbooks.recordKey, guestbookKey), eq(users.did, ownerDid))
     );
@@ -96,6 +106,7 @@ export const getGuestbook = async ({
           },
           text: entry.submissions!.text || undefined,
           createdAt: entry.submissions!.createdAt.toISOString(),
+          hidden: !!entry.hiddenSubmissions?.id,
         })) || [],
   };
 };

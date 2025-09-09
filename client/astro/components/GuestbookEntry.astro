@@ -7,7 +7,7 @@ interface Props extends SubmissionView {
   guestbookAtUri: AtUri;
 }
 
-const { author, text, createdAt, atUri, guestbookAtUri } = Astro.props;
+const { author, text, createdAt, atUri, guestbookAtUri, hidden } = Astro.props;
 
 const loggedInUserDid = Astro.locals.loggedInUser?.did;
 const authorLink = author.handle
@@ -17,11 +17,20 @@ const authorLink = author.handle
 const deleteSubmissionResult = Astro.getActionResult(actions.deleteSubmission);
 const hideSubmissionResult = Astro.getActionResult(actions.hideSubmission);
 
-const body = await Astro.request.clone().formData();
-const actionSubmissionAtUri = body.get("atUri").valueOf();
+let actionSubmissionAtUri = null;
+if (deleteSubmissionResult || hideSubmissionResult) {
+  if (!Astro.request.bodyUsed) {
+    const body = await Astro.request.formData();
+    actionSubmissionAtUri = body.get("atUri").valueOf();
+  }
+}
 ---
 
-<article>
+<article
+  class:list={{
+    hidden,
+  }}
+>
   <img src={author.avatar} />
   <span>
     <a class="author" href={authorLink}>@{author.handle ?? author.did}</a>
@@ -53,14 +62,17 @@ const actionSubmissionAtUri = body.get("atUri").valueOf();
   {
     loggedInUserDid && loggedInUserDid !== author.did && (
       <div>
-        <form method="POST" action={actions.hideSubmission}>
+        <form
+          method="POST"
+          action={hidden ? actions.showSubmission : actions.hideSubmission}
+        >
           <input name="atUri" type="hidden" value={atUri} />
           <input
             name="guestbookAtUri"
             type="hidden"
             value={guestbookAtUri.toString()}
           />
-          <button type="submit">Hide entry</button>
+          <button type="submit">{hidden ? "Show" : "Hide"} entry</button>
         </form>
         {actionSubmissionAtUri == atUri && hideSubmissionResult?.error && (
           <p class="error">{hideSubmissionResult.error.message}</p>
@@ -77,6 +89,9 @@ const actionSubmissionAtUri = body.get("atUri").valueOf();
       border-radius: 1.6rem;
       display: flex;
       flex-direction: column;
+    }
+    .hidden {
+      opacity: 50%;
     }
     img {
       width: 2.5rem;

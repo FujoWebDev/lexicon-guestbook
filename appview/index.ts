@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { createRoutes } from "./routes/auth.js";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
+import { submissions } from "./db/schema.js";
 
 const pubKey = readFileSync("./public_key.pem", "utf-8");
 const PORT = process.env.PORT ?? "3003";
@@ -60,6 +61,7 @@ server.com.fujocoded.guestbook.getGuestbook({
     const [guestbookKey, _collectionType, ownerDid] = params.guestbookAtUri
       .split("/")
       .toReversed();
+
     const guestbookData = await getGuestbook({
       guestbookKey,
       ownerDid,
@@ -75,6 +77,9 @@ server.com.fujocoded.guestbook.getGuestbook({
     const guestbookResponse = {
       atUri: params.guestbookAtUri,
       ...guestbookData,
+      submissions: params.showHidden
+        ? guestbookData.submissions
+        : guestbookData.submissions.filter((submission) => !submission.hidden),
     };
 
     return {
@@ -119,6 +124,7 @@ server.com.fujocoded.guestbook.getGuestbooks({
 createRoutes(app);
 
 app.use(server.xrpc.router);
+
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });

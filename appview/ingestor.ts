@@ -23,9 +23,6 @@ import {
 import { z } from "zod";
 import { handleBookEvent } from "./lib/book.js";
 import { handleSubmissionEvent } from "./lib/submission.js";
-import { db } from "./db/index.js";
-import { Cursor } from "./db/schema.js";
-import { eq } from "drizzle-orm";
 import { cursorToDate, getLastCursor, updateCursor } from "./lib/cursor.js";
 import { handleGateEvent } from "./lib/gate.js";
 
@@ -191,6 +188,8 @@ ws.on("message", async (data) => {
     console.log(
       `${eventData.commit.operation}d book: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
     );
+
+    return;
   }
 
   // Check if this event is related to a submission to a guestbook
@@ -206,6 +205,8 @@ ws.on("message", async (data) => {
     console.log(
       `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
     );
+
+    return;
   }
 
   if (isGateRecord(eventData.commit.record)) {
@@ -217,6 +218,8 @@ ws.on("message", async (data) => {
       },
       eventData.commit.operation
     );
+
+    return;
   }
 
   console.error(`Unknown record type: ${eventData.commit.record.$type}`);

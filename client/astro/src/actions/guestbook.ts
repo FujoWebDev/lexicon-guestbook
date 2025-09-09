@@ -2,7 +2,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { AtUri } from "@atproto/api";
 import { getGuestbookAgent } from "../lib/atproto";
-import { AstroError } from "astro/errors";
+import { type Record as GateRecord } from "../../../generated/api/types/com/fujocoded/guestbook/gate";
 
 export const actions = {
   postToGuestbook: defineAction({
@@ -124,7 +124,7 @@ export const actions = {
             }
             throw e;
           })
-      ).value;
+      ).value as GateRecord;
 
       const newSubmission = {
         hiddenAt: new Date().toISOString(),
@@ -133,7 +133,8 @@ export const actions = {
       };
       if (
         currentData.hiddenSubmissions.find(
-          (hiddenSubmission) => newSubmission.submissionUri
+          (hiddenSubmission) =>
+            hiddenSubmission.submissionUri == newSubmission.submissionUri
         )
       ) {
         // The submission already exists in the array, so we do nothing.
@@ -149,6 +150,68 @@ export const actions = {
           rkey: "default",
         },
         currentData
+      );
+
+      return data;
+    },
+  }),
+  showSubmission: defineAction({
+    accept: "form",
+    input: z.object({
+      atUri: z.string(),
+      guestbookAtUri: z.string(),
+    }),
+    handler: async (input, context) => {
+      const guestbookAgent = await getGuestbookAgent(context.locals);
+      const { host } = new AtUri(input.atUri);
+
+      if (!context.locals.loggedInUser) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to hide a post",
+        });
+      }
+
+      if (context.locals.loggedInUser.did === host) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "You can only show other people's posts.",
+        });
+      }
+
+      // TODO: check if the record exists before showing it if you want
+      // to warn the user in case of errors
+
+      const currentData = (
+        await guestbookAgent.com.fujocoded.guestbook.gate
+          .get({
+            repo: context.locals.loggedInUser.did,
+            rkey: "default",
+          })
+          .catch((e) => {
+            if (e.error === "RecordNotFound") {
+              // First time creating a gate, just return an empty one
+              return {
+                $type: "com.fujocoded.guestbook.gate",
+                value: { hiddenSubmissions: [] },
+              };
+            }
+            throw e;
+          })
+      ).value as GateRecord;
+
+      const newSubmissions = currentData.hiddenSubmissions.filter(
+        (hiddenSubmission) => hiddenSubmission.submissionUri !== input.atUri
+      );
+
+      console.dir(newSubmissions, { depth: null });
+
+      const data = await guestbookAgent.com.fujocoded.guestbook.gate.put(
+        {
+          repo: context.locals.loggedInUser.did,
+          rkey: "default",
+        },
+        { ...currentData, hiddenSubmissions: newSubmissions }
       );
 
       return data;

@@ -191,8 +191,9 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 ### Lexicon
 
 - [x] Allow hiding guestbook submissions
-- [ ] Return information on submissions visibility in queries
-- [ ] Allow blocking users
+- [x] Return information on submissions visibility in queries
+- [ ] Return information on submissions visibility in guestbooks list
+- [x] Allow blocking users
 - [ ] Allow restricting which URLs a guestbook is displayable on
 
 ### AppView
@@ -207,7 +208,9 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Allow creating guestbooks
 - [x] Handle deletions of submissions
 - [ ] Handle deletions of guestbooks
-- [ ] Return information on submissions visibility in queries
+- [x] Return information on submissions visibility in queries
+- [ ] Return hidden submissions ONLY if you're logged in
+- [ ] DO NOT SWALLOW ERRORS and log them instead
 
 ### CLI Client
 
@@ -251,6 +254,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [ ] Handle identity/account events
 - [x] Handle deletions of submissions
 - [ ] Handle deletions of guestbooks
-- [ ] Push new database schema for hidden submissions
-- [ ] Make sure hiding submissions work
+- [ ] Handle blocking of users
+- [x] Push new database schema for hidden submissions
+- [x] Make sure hiding submissions work
 - [ ] Handle deletion of gates

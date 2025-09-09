@@ -20,6 +20,7 @@ const guestbookResponse =
   // to get the guestbook data, passing its AtUri as a parameter.
   await guestbookAgent.com.fujocoded.guestbook.getGuestbook({
     guestbookAtUri: guestbookAtUri.toString(),
+    showHidden: !!Astro.locals.loggedInUser,
   });
 
 if (!guestbookResponse.success) {

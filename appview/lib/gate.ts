@@ -62,6 +62,9 @@ const hideSubmissions = async (
       };
     })
   );
+  if (!atUrisToHide.length) {
+    return;
+  }
   await tx.insert(hiddenSubmissions).values(atUrisToHide);
 };
 
@@ -80,7 +83,10 @@ export const handleGateEvent = async (
     const content = gateDetails.content;
 
     await db.transaction(async (tx) => {
+      // First we delete all submissions...
       await deleteHiddenSubmissionsByUser({ did: gateDetails.owner }, tx);
+      // ...then we put the all back in
+      // TODO: do this the reasonable way (calculate the diff)
       await hideSubmissions(
         {
           did: gateDetails.owner,
