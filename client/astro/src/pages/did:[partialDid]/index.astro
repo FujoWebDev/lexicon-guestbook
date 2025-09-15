@@ -41,7 +41,13 @@ if (!guestbooks.success) {
                   {guestbook.title ??
                     `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
                 </a>
-                (submissions: {guestbook.submissionsCount ?? "N/A"})
+                (submissions: {guestbook.submissionsCount ?? "N/A"}
+                {!!guestbook.hiddenSubmissionsCount && (
+                  <Fragment>
+                    — {guestbook.hiddenSubmissionsCount} hidden
+                  </Fragment>
+                )}
+                )
               </div>
               <div style="color:gray; font-size:smaller">{guestbook.atUri}</div>
             </li>
@@ -49,7 +55,13 @@ if (!guestbooks.success) {
         })
       }
     </ul>
-    <h3>Create new guestbook</h3>
-    <CreateGuestbookForm />
+    {
+      Astro.locals.loggedInUser && (
+        <Fragment>
+          <h3>Create new guestbook</h3>
+          <CreateGuestbookForm />
+        </Fragment>
+      )
+    }
   </div>
 </Layout>

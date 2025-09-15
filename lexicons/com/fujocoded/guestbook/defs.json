@@ -19,6 +19,10 @@
         },
         "submissionsCount": {
           "type": "integer"
+        },
+        "hiddenSubmissionsCount": {
+          "type": "integer",
+          "description": "If the requesting user is the owner of the guestbook, we also return information about hidden submissions."
         }
       }
     },

@@ -189,7 +189,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 - [x] Allow hiding guestbook submissions
 - [x] Return information on submissions visibility in queries
-- [ ] Return information on submissions visibility in guestbooks list
+- [x] Return information on submissions visibility in guestbooks list
 - [x] Allow blocking users
 - [ ] Allow restricting which URLs a guestbook is displayable on
 
@@ -206,6 +206,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Handle deletions of submissions
 - [ ] Handle deletions of guestbooks
 - [x] Return information on submissions visibility in queries
+- [x] Return information on submissions visibility in guestbooks list
 - [x] Return hidden submissions ONLY if you're logged in
 - [ ] DO NOT SWALLOW ERRORS and log them instead
 
@@ -232,10 +233,12 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Move Astro-based client to client directory
 - [x] Re-add authentication to the client
 - [x] Allow deletions of submissions
+- [ ] Allow deletions of your submissions on other people's guestbooks
 - [ ] Allow deletions of guestbooks
 - [ ] Do Astro trick to redirect after submission
 - [x] Hide hidden submissions when logged out
-- [x] Show which submissions are hidden to a logged in user
+- [x] Show which submissions are hidden to a logged in user on guestbook
+- [x] Show information on submissions visibility in guestbooks list
 
 #### HTML iframe Client
 

@@ -132,7 +132,7 @@ server.com.fujocoded.guestbook.getGuestbook({
 });
 
 server.com.fujocoded.guestbook.getGuestbooks({
-  handler: async ({ params }) => {
+  handler: async ({ req, params }) => {
     const userDid = params.ownerDid;
     const guestbooksData = await getGuestbooksByUser({ userDid });
     const guestbooks: GuestbookOutput["guestbooks"] = await Promise.all(
@@ -143,13 +143,20 @@ server.com.fujocoded.guestbook.getGuestbooks({
           ownerDid: userDid,
         });
 
+        const isOwnGuestbook = (await getDidInAuth(req)) === userDid;
+
         return {
           title: guestbook.title ?? undefined,
           atUri: `at://${guestbook.ownerDid}/${guestbook.collection}/${guestbook.recordKey}`,
           owner: {
             did: guestbook.ownerDid,
           },
-          submissionsCount: submissions.length,
+          submissionsCount: submissions.filter(
+            (submission) => !submission.hiddenAt
+          ).length,
+          hiddenSubmissionsCount: isOwnGuestbook
+            ? submissions.filter((submission) => !!submission.hiddenAt).length
+            : undefined,
         };
       })
     );

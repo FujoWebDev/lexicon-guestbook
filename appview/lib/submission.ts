@@ -1,7 +1,12 @@
 import { and, eq, getTableColumns, param } from "drizzle-orm";
 import { type Record as Submission } from "../../client/generated/api/types/com/fujocoded/guestbook/submission.js";
 import { db } from "../db/index.js";
-import { guestbooks, submissions, users } from "../db/schema.js";
+import {
+  guestbooks,
+  hiddenSubmissions,
+  submissions,
+  users,
+} from "../db/schema.js";
 import { createOrGetUser } from "./user.js";
 import { getGuestbook } from "./book.js";
 import { AtUri } from "@atproto/api";
@@ -118,10 +123,15 @@ export const getSubmissionByGuestbook = async ({
   return await db
     .select({
       ...getTableColumns(submissions),
+      hiddenAt: hiddenSubmissions.hiddenAt,
     })
     .from(submissions)
     .leftJoin(guestbooks, eq(guestbooks.id, submissions.postedTo))
     .innerJoin(users, eq(users.id, guestbooks.owner))
+    .leftJoin(
+      hiddenSubmissions,
+      eq(submissions.id, hiddenSubmissions.submissionId)
+    )
     .where(
       and(
         eq(guestbooks.recordKey, guestbookKey),
