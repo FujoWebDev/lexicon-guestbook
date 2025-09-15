@@ -75,16 +75,3 @@ const result = Astro.getActionResult(actions.postToGuestbook);
     gap: 1.5rem;
   }
 </style>
-
-<script>
-  import { actions } from "astro:actions";
-  import { navigate } from "astro:transitions/client";
-
-  const form = document.querySelector("form");
-  //   form?.addEventListener("submit", async (event) => {
-  //     event.preventDefault();
-  //     const formData = new FormData(form);
-  //     const { error } = await actions.postToGuestbook(formData);
-  //     if (!error) navigate("");
-  //   });
-</script>

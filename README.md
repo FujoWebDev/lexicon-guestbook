@@ -109,10 +109,7 @@ The DID document for your AppView will need a public/private key pair to ensure
 applications know you are who you say you are. Here's how you can generate one:
 
 1. Enter the AppView directory with `cd appview/`
-2. Generate the private key: `openssl ecparam -name secp256k1 -genkey -noout
--out private_key.pem`
-3. Generate the public key: `openssl ec -in private_key.pem -pubout -out
-public_key.pem`
+2. Generate the public/private keys with `npm run keys:generate`
 
 ### Create the database and initialize its schema
 
@@ -209,7 +206,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Handle deletions of submissions
 - [ ] Handle deletions of guestbooks
 - [x] Return information on submissions visibility in queries
-- [ ] Return hidden submissions ONLY if you're logged in
+- [x] Return hidden submissions ONLY if you're logged in
 - [ ] DO NOT SWALLOW ERRORS and log them instead
 
 ### CLI Client
@@ -229,14 +226,16 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
   - [x] Allow users to use their handle and not just DID
   - [x] Allow users to log out
   - [ ] Redirect to right port on login
+  - [ ] Figure out how to configure where it goes on logout
 - [x] Allow creating guestbooks
 - [x] Allow listing guestbooks of a user
 - [x] Move Astro-based client to client directory
 - [x] Re-add authentication to the client
 - [x] Allow deletions of submissions
 - [ ] Allow deletions of guestbooks
-- [ ] Hide hidden submissions when logged out
-- [ ] Show which submissions are hidden to a logged in user
+- [ ] Do Astro trick to redirect after submission
+- [x] Hide hidden submissions when logged out
+- [x] Show which submissions are hidden to a logged in user
 
 #### HTML iframe Client
 

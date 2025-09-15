@@ -58,7 +58,6 @@ const handleSubmissionUpsert = async ({
   });
 
   if (!guestbook) {
-    console.dir(submission.postedTo, { depth: null });
     throw new Error(`Attempting create or update on unknown guestbook`);
   }
 

@@ -2,6 +2,6 @@ generated/
 node_modules/
 .env
 appview.db
-private_key.pem
+private_jwk.json
 .astro
 dist/

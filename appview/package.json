@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "tsx watch ./index.ts",
     "dev:ingestor": "tsx watch ./ingestor.ts",
+    "keys:generate": "tsx ./generate-keys.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "FujoCoded LLC",

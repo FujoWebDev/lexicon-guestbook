@@ -204,8 +204,6 @@ export const actions = {
         (hiddenSubmission) => hiddenSubmission.submissionUri !== input.atUri
       );
 
-      console.dir(newSubmissions, { depth: null });
-
       const data = await guestbookAgent.com.fujocoded.guestbook.gate.put(
         {
           repo: context.locals.loggedInUser.did,
