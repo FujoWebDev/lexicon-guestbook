@@ -184,6 +184,8 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 - [x] Get someone else to write in the lexicon!
 - [ ] Display other lexicons
+  - [ ] Turn the submission type returns into a union
+- [ ] Deploy the AppView
 
 ### Lexicon
 
