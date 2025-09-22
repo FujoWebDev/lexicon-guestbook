@@ -206,11 +206,23 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [ ] Check out CORS
 - [x] Allow creating guestbooks
 - [x] Handle deletions of submissions
-- [ ] Handle deletions of guestbooks
+- [ ] Handle deletions of guestbooks <= NEXT UP!!!
 - [x] Return information on submissions visibility in queries
 - [x] Return information on submissions visibility in guestbooks list
 - [x] Return hidden submissions ONLY if you're logged in
 - [ ] DO NOT SWALLOW ERRORS and log them instead
+
+### Ingestor
+
+- [x] Catch up with cursor
+- [ ] Change timing of cursor save to consider all operations
+- [ ] Handle identity/account events
+- [x] Handle deletions of submissions
+- [ ] Handle deletions of guestbooks <= NEXT UP!!!
+- [ ] Handle blocking of users
+- [x] Push new database schema for hidden submissions
+- [x] Make sure hiding submissions work
+- [ ] Handle deletion of gates
 
 ### CLI Client
 
@@ -236,8 +248,8 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Re-add authentication to the client
 - [x] Allow deletions of submissions
 - [ ] Allow deletions of your submissions on other people's guestbooks
-- [ ] Allow deletions of guestbooks
-- [ ] Do Astro trick to redirect after submission
+- [ ] Allow deletions of guestbooks <= NEXT UP!!!
+- [x] Do Astro trick to redirect after submission
 - [x] Hide hidden submissions when logged out
 - [x] Show which submissions are hidden to a logged in user on guestbook
 - [x] Show information on submissions visibility in guestbooks list
@@ -250,15 +262,3 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 - [ ] Create Astro plugin
 - [ ] Create guestbook webcomponent(?)
-
-### Ingestor
-
-- [x] Catch up with cursor
-- [ ] Change timing of cursor save to consider all operations
-- [ ] Handle identity/account events
-- [x] Handle deletions of submissions
-- [ ] Handle deletions of guestbooks
-- [ ] Handle blocking of users
-- [x] Push new database schema for hidden submissions
-- [x] Make sure hiding submissions work
-- [ ] Handle deletion of gates
