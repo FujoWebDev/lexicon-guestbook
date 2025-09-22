@@ -35,21 +35,26 @@ if (!guestbooks.success) {
           return (
             <li>
               <div>
-                <a
-                  href={`guestbook/${ownerDid}/${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
-                >
-                  {guestbook.title ??
-                    `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
-                </a>
-                (submissions: {guestbook.submissionsCount ?? "N/A"}
-                {!!guestbook.hiddenSubmissionsCount && (
-                  <Fragment>
-                    — {guestbook.hiddenSubmissionsCount} hidden
-                  </Fragment>
-                )}
-                )
+                <div>
+                  <a
+                    href={`guestbook/${ownerDid}/${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+                  >
+                    {guestbook.title ??
+                      `${guestbookAtUri.collection}/${guestbookAtUri.rkey}`}
+                  </a>
+                  (submissions: {guestbook.submissionsCount ?? "N/A"}
+                  {!!guestbook.hiddenSubmissionsCount && (
+                    <Fragment>
+                      — {guestbook.hiddenSubmissionsCount} hidden
+                    </Fragment>
+                  )}
+                  )
+                </div>
+                <div style="color:gray; font-size:smaller">
+                  {guestbook.atUri}
+                </div>
               </div>
-              <div style="color:gray; font-size:smaller">{guestbook.atUri}</div>
+              <button>Delete</button>
             </li>
           );
         })
@@ -65,3 +70,24 @@ if (!guestbooks.success) {
     }
   </div>
 </Layout>
+
+<style>
+  li button {
+    visibility: hidden;
+  }
+
+  li:hover button {
+    visibility: visible;
+  }
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+
+  ul {
+    width: max-content;
+  }
+</style>
