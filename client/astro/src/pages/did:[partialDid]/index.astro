@@ -20,6 +20,8 @@ const guestbooks = await guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
 if (!guestbooks.success) {
   throw new Error(`There was an error fetching the data for ${ownerDid}`);
 }
+
+const result = Astro.getActionResult(actions.deleteGuestbook);
 ---
 
 <Layout>
@@ -29,6 +31,13 @@ if (!guestbooks.success) {
         >pdsls</a
       >)
     </h2>
+    {
+      result?.error && (
+        <div>
+          There was an error deleting your guestbook: {result.error.message}
+        </div>
+      )
+    }
     <ul>
       {
         guestbooks.data.guestbooks.map((guestbook) => {
@@ -55,15 +64,23 @@ if (!guestbooks.success) {
                   {guestbook.atUri}
                 </div>
               </div>
-              <form action={actions.deleteGuestbook}>
-                <input type="hidden" value={guestbook.atUri} name="atUri" />
-                <input type="submit" value="Delete" />
-              </form>
+              <button class="deleteButton" data-at-uri={guestbook.atUri}>
+                Delete
+              </button>
             </li>
           );
         })
       }
     </ul>
+    <!-- Find a polyfill for closedby "any" because I tasted it and I refuse to give it up -->
+    <dialog class="confirm-delete" closedby="any">
+      Do you want to delete this guestbook?
+      <form action={actions.deleteGuestbook} method="dialog">
+        <input type="hidden" name="atUri" />
+        <button value="cancel" autofocus>Cancel</button>
+        <input type="submit" formmethod="POST" value="Delete" />
+      </form>
+    </dialog>
     {
       Astro.locals.loggedInUser && (
         <Fragment>
@@ -74,6 +91,25 @@ if (!guestbooks.success) {
     }
   </div>
 </Layout>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>(
+    "dialog.confirm-delete"
+  );
+  const atUriInput = dialog.querySelector<HTMLInputElement>(
+    'input[name="atUri"]'
+  );
+  const deleteButtons =
+    document.querySelectorAll<HTMLButtonElement>(".deleteButton");
+
+  for (const deleteButton of deleteButtons) {
+    deleteButton.addEventListener("click", (e) => {
+      dialog.showModal();
+      const atUri = deleteButton.dataset.atUri;
+      atUriInput.value = atUri;
+    });
+  }
+</script>
 
 <style>
   li input[type="submit"] {
