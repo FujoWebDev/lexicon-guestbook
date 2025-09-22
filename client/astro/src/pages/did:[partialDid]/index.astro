@@ -7,6 +7,7 @@ import { AtUri } from "@atproto/syntax";
 import CreateGuestbookForm from "../../../components/CreateGuestbookForm.astro";
 import { didToHandle, getGuestbookAgent } from "../../lib/atproto";
 import Layout from "../../../layouts/Layout.astro";
+import { actions } from "astro:actions";
 
 const ownerDid = "did:" + partialDid;
 const ownerHandle = await didToHandle(ownerDid);
@@ -54,7 +55,10 @@ if (!guestbooks.success) {
                   {guestbook.atUri}
                 </div>
               </div>
-              <button>Delete</button>
+              <form action={actions.deleteGuestbook}>
+                <input type="hidden" value={guestbook.atUri} name="atUri" />
+                <input type="submit" value="Delete" />
+              </form>
             </li>
           );
         })
@@ -72,11 +76,11 @@ if (!guestbooks.success) {
 </Layout>
 
 <style>
-  li button {
+  li input[type="submit"] {
     visibility: hidden;
   }
 
-  li:hover button {
+  li:hover input[type="submit"] {
     visibility: visible;
   }
 

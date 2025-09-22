@@ -50,6 +50,39 @@ export const actions = {
       return data;
     },
   }),
+  deleteGuestbook: defineAction({
+    accept: "form",
+    input: z.object({
+      atUri: z.string(),
+    }),
+    handler: async (input, context) => {
+      const guestbookAgent = await getGuestbookAgent(context.locals);
+      const { rkey, host } = new AtUri(input.atUri);
+
+      if (!context.locals.loggedInUser) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to delete a post",
+        });
+      }
+
+      if (context.locals.loggedInUser.did !== host) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "You can only delete your own guestbooks.",
+        });
+      }
+
+      // TODO: check if the record exists before deleting if you want
+      // to warn the user in case of errors
+      const data = await guestbookAgent.com.fujocoded.guestbook.book.delete({
+        repo: context.locals.loggedInUser.did,
+        rkey,
+      });
+
+      return data;
+    },
+  }),
   deleteSubmission: defineAction({
     accept: "form",
     input: z.object({
