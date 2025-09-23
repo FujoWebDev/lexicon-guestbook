@@ -11,7 +11,7 @@ import { eq, getTableColumns, and } from "drizzle-orm";
 import { resolveBskyUserProfiles, createOrGetUser } from "./user.js";
 
 export const handleBookEvent = async (
-  params: { book: Book; author: string; recordKey: string },
+  params: { book: Book | undefined; author: string; recordKey: string },
   eventType: "create" | "update" | "delete"
 ) => {
   if (eventType == "create") {
@@ -20,18 +20,24 @@ export const handleBookEvent = async (
       .insert(guestbooks)
       .values({
         recordKey: params.recordKey,
-        collection: params.book.$type,
-        title: params.book.title,
+        collection: params.book!.$type,
+        title: params.book!.title,
         owner: user.id,
         record: JSON.stringify(params.book),
       })
       .onConflictDoUpdate({
         target: [guestbooks.recordKey, guestbooks.collection, guestbooks.owner],
         set: {
-          title: params.book.title,
+          title: params.book!.title,
           record: JSON.stringify(params.book),
         },
       });
+  }
+  if (eventType == "delete") {
+    await deleteGuestBook({
+      guestbookKey: params.recordKey,
+      ownerDid: params.author,
+    });
   }
 };
 
@@ -88,6 +94,7 @@ export const getGuestbook = async ({
   return {
     id: guestbookEntries[0].id,
     title: guestbookEntries[0].title || undefined,
+    isDeleted: guestbookEntries[0].isDeleted,
     owner: {
       did: guestbookEntries[0].ownerDid,
       handle: profilesMap.get(ownerDid)?.handle,
@@ -109,4 +116,19 @@ export const getGuestbook = async ({
           hidden: !!entry.hiddenSubmissions?.id,
         })) || [],
   };
+};
+
+const deleteGuestBook = async ({
+  guestbookKey,
+  ownerDid,
+}: {
+  guestbookKey: string;
+  ownerDid: string;
+}) => {
+  const ownerId = (await createOrGetUser({ did: ownerDid })).id;
+  await db
+    .delete(guestbooks)
+    .where(
+      and(eq(guestbooks.recordKey, guestbookKey), eq(guestbooks.owner, ownerId))
+    );
 };

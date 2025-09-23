@@ -1,11 +1,4 @@
-import {
-  index,
-  int,
-  integer,
-  sqliteTable,
-  text,
-  unique,
-} from "drizzle-orm/sqlite-core";
+import { index, int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable(
   "user",
@@ -27,6 +20,8 @@ export const guestbooks = sqliteTable(
       .notNull()
       .references(() => users.id),
     record: text({ mode: "json" }).notNull(),
+    // TODO: make this notNull
+    isDeleted: int({ mode: "boolean" }).default(false),
   },
   (t) => [unique().on(t.owner, t.collection, t.recordKey)]
 );

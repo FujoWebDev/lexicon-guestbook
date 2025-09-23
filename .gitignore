@@ -1,7 +1,7 @@
 generated/
 node_modules/
 .env
-appview.db
+appview*.db
 private_jwk.json
 .astro
 dist/

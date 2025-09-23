@@ -104,7 +104,9 @@ server.com.fujocoded.guestbook.getGuestbook({
       ownerDid,
     });
 
-    if (!guestbookData) {
+    // TODO: show deleted guestbooks that still have submissions to the
+    // guestbook owner
+    if (!guestbookData || guestbookData.isDeleted) {
       return {
         status: 404,
         message: "Guestbook not found",
@@ -136,29 +138,31 @@ server.com.fujocoded.guestbook.getGuestbooks({
     const userDid = params.ownerDid;
     const guestbooksData = await getGuestbooksByUser({ userDid });
     const guestbooks: GuestbookOutput["guestbooks"] = await Promise.all(
-      guestbooksData.map(async (guestbook) => {
-        const submissions = await getSubmissionByGuestbook({
-          guestbookKey: guestbook.recordKey,
-          collectionType: guestbook.collection,
-          ownerDid: userDid,
-        });
+      guestbooksData
+        .filter((guestbook) => !guestbook.isDeleted)
+        .map(async (guestbook) => {
+          const submissions = await getSubmissionByGuestbook({
+            guestbookKey: guestbook.recordKey,
+            collectionType: guestbook.collection,
+            ownerDid: userDid,
+          });
 
-        const isOwnGuestbook = (await getDidInAuth(req)) === userDid;
+          const isOwnGuestbook = (await getDidInAuth(req)) === userDid;
 
-        return {
-          title: guestbook.title ?? undefined,
-          atUri: `at://${guestbook.ownerDid}/${guestbook.collection}/${guestbook.recordKey}`,
-          owner: {
-            did: guestbook.ownerDid,
-          },
-          submissionsCount: submissions.filter(
-            (submission) => !submission.hiddenAt
-          ).length,
-          hiddenSubmissionsCount: isOwnGuestbook
-            ? submissions.filter((submission) => !!submission.hiddenAt).length
-            : undefined,
-        };
-      })
+          return {
+            title: guestbook.title ?? undefined,
+            atUri: `at://${guestbook.ownerDid}/${guestbook.collection}/${guestbook.recordKey}`,
+            owner: {
+              did: guestbook.ownerDid,
+            },
+            submissionsCount: submissions.filter(
+              (submission) => !submission.hiddenAt
+            ).length,
+            hiddenSubmissionsCount: isOwnGuestbook
+              ? submissions.filter((submission) => !!submission.hiddenAt).length
+              : undefined,
+          };
+        })
     );
 
     return {

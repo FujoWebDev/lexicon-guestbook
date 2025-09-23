@@ -173,6 +173,20 @@ ws.on("message", async (data) => {
         "delete"
       );
     }
+    if (
+      isBookRecord({
+        $type: eventData.commit.collection,
+      })
+    ) {
+      await handleBookEvent(
+        {
+          author: eventData.did,
+          recordKey: eventData.commit.rkey,
+          book: undefined,
+        },
+        "delete"
+      );
+    }
     return;
   }
   // Check if this event is related to an actual guestbook
