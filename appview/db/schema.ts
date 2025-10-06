@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { index, int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable(
@@ -55,6 +56,43 @@ export const hiddenSubmissions = sqliteTable("hidden_submission", {
     .references(() => users.id),
   hiddenAt: int({ mode: "timestamp" }),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  guestbooks: many(guestbooks),
+  submissions: many(submissions),
+  hiddenSubmissions: many(hiddenSubmissions),
+}));
+
+export const guestbooksRelations = relations(guestbooks, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [guestbooks.owner],
+    references: [users.id],
+  }),
+  submissions: many(submissions),
+}));
+
+export const submissionsRelations = relations(submissions, ({ one, many }) => ({
+  guestbook: one(guestbooks, {
+    fields: [submissions.postedTo],
+    references: [guestbooks.id],
+  }),
+  author: one(users, {
+    fields: [submissions.author],
+    references: [users.id],
+  }),
+  hiddenEntries: many(hiddenSubmissions),
+}));
+
+export const hiddenSubmissionsRelations = relations(hiddenSubmissions, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [hiddenSubmissions.submissionId],
+    references: [submissions.id],
+  }),
+  hiddenBy: one(users, {
+    fields: [hiddenSubmissions.hiddenBy],
+    references: [users.id],
+  }),
+}));
 
 export const Cursor = sqliteTable("cursor", {
   id: int().primaryKey(),

@@ -1,13 +1,7 @@
-import { alias } from "drizzle-orm/sqlite-core";
+import { eq, and } from "drizzle-orm";
 import { type Record as Book } from "../../client/generated/api/types/com/fujocoded/guestbook/book.js";
 import { db } from "../db/index.js";
-import {
-  guestbooks,
-  hiddenSubmissions,
-  submissions,
-  users,
-} from "../db/schema.js";
-import { eq, getTableColumns, and } from "drizzle-orm";
+import { guestbooks, users } from "../db/schema.js";
 import { resolveBskyUserProfiles, createOrGetUser } from "./user.js";
 
 export const handleBookEvent = async (
@@ -42,14 +36,21 @@ export const handleBookEvent = async (
 };
 
 export const getGuestbooksByUser = async ({ userDid }: { userDid: string }) => {
-  return await db
-    .select({
-      ...getTableColumns(guestbooks),
-      ownerDid: users.did,
-    })
-    .from(guestbooks)
-    .innerJoin(users, eq(users.id, guestbooks.owner))
-    .where(eq(users.did, userDid));
+  const owner = await db.query.users.findFirst({
+    where: eq(users.did, userDid),
+    with: {
+      guestbooks: true,
+    },
+  });
+
+  if (!owner) {
+    return [];
+  }
+
+  return owner.guestbooks.map((book) => ({
+    ...book,
+    ownerDid: owner.did,
+  }));
 };
 
 export const getGuestbook = async ({
@@ -59,62 +60,57 @@ export const getGuestbook = async ({
   guestbookKey: string;
   ownerDid: string;
 }) => {
-  const authors = alias(users, "authors");
-  const guestbookEntries = await db
-    .select({
-      ...getTableColumns(guestbooks),
-      ownerDid: users.did,
-      submissions: submissions,
-      submissionAuthor: authors,
-      hiddenSubmissions: hiddenSubmissions,
-    })
-    .from(guestbooks)
-    .innerJoin(users, eq(users.id, guestbooks.owner))
-    .leftJoin(submissions, eq(submissions.postedTo, guestbooks.id))
-    .leftJoin(authors, eq(submissions.author, authors.id))
-    .leftJoin(
-      hiddenSubmissions,
-      eq(submissions.id, hiddenSubmissions.submissionId)
-    )
-    .where(
-      and(eq(guestbooks.recordKey, guestbookKey), eq(users.did, ownerDid))
-    );
+  const owner = await db.query.users.findFirst({
+    where: eq(users.did, ownerDid),
+    with: {
+      guestbooks: {
+        where: eq(guestbooks.recordKey, guestbookKey),
+        with: {
+          submissions: {
+            with: {
+              author: true,
+              hiddenEntries: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
-  if (!guestbookEntries || !guestbookEntries.length) {
+  const guestbook = owner?.guestbooks[0];
+
+  if (!owner || !guestbook) {
     return null;
   }
 
   const profilesMap = await resolveBskyUserProfiles([
     ownerDid,
-    ...guestbookEntries
-      .map((entry) => entry.submissionAuthor?.did)
+    ...guestbook.submissions
+      .map((entry) => entry.author?.did)
       .filter((x): x is string => !!x),
   ]);
 
   return {
-    id: guestbookEntries[0].id,
-    title: guestbookEntries[0].title || undefined,
-    isDeleted: guestbookEntries[0].isDeleted,
+    id: guestbook.id,
+    title: guestbook.title || undefined,
+    isDeleted: guestbook.isDeleted,
     owner: {
-      did: guestbookEntries[0].ownerDid,
+      did: owner.did,
       handle: profilesMap.get(ownerDid)?.handle,
       avatar: profilesMap.get(ownerDid)?.avatar,
     },
     submissions:
-      guestbookEntries
-        // We only take guestbookEntries that have submissions associated with them
-        .filter((entry) => entry.submissions)
-        .map((entry) => ({
-          atUri: `at://${entry.submissionAuthor?.did}/${entry.submissions?.collection}/${entry.submissions?.recordKey}`,
-          author: {
-            did: entry.submissionAuthor!.did,
-            handle: profilesMap.get(entry.submissionAuthor!.did)?.handle,
-            avatar: profilesMap.get(entry.submissionAuthor!.did)?.avatar,
-          },
-          text: entry.submissions!.text || undefined,
-          createdAt: entry.submissions!.createdAt.toISOString(),
-          hidden: !!entry.hiddenSubmissions?.id,
-        })) || [],
+      guestbook.submissions.map((entry) => ({
+        atUri: `at://${entry.author.did}/${entry.collection}/${entry.recordKey}`,
+        author: {
+          did: entry.author.did,
+          handle: profilesMap.get(entry.author.did)?.handle,
+          avatar: profilesMap.get(entry.author.did)?.avatar,
+        },
+        text: entry.text || undefined,
+        createdAt: entry.createdAt.toISOString(),
+        hidden: (entry.hiddenEntries ?? []).length > 0,
+      })) ?? [],
   };
 };
 
