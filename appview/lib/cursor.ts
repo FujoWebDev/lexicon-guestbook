@@ -26,3 +26,33 @@ export const updateCursor = async (cursor: number) => {
       },
     });
 };
+
+// This creates a function that will update the cursor periodically, starting from
+// the given cursor, and then updating it at most once every given interval.
+export const createCursorUpdater = ({
+  startFromCursor: startFromCursorMicroseconds,
+  cursorUpdateIntervalMilliseconds,
+}: {
+  startFromCursor: number | null;
+  cursorUpdateIntervalMilliseconds: number;
+}) => {
+  let lastCursorMicroseconds = startFromCursorMicroseconds;
+  return async (timestampMicroseconds: number) => {
+    // Orginal timestamp is in microseconds
+    const elapsedTimeMilliseconds =
+      (timestampMicroseconds - (lastCursorMicroseconds ?? 0)) / 1000;
+    if (
+      !lastCursorMicroseconds ||
+      elapsedTimeMilliseconds > cursorUpdateIntervalMilliseconds
+    ) {
+      lastCursorMicroseconds = timestampMicroseconds;
+      console.log("Updating cursor...");
+      await updateCursor(lastCursorMicroseconds);
+      console.log(
+        `Updated cursor to: ${lastCursorMicroseconds} (${cursorToDate(
+          lastCursorMicroseconds
+        ).toLocaleString()})`
+      );
+    }
+  };
+};

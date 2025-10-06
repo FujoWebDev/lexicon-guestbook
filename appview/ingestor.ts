@@ -8,55 +8,19 @@
  * Jetstreams here: https://github.com/bluesky-social/jetstream
  */
 import WebSocket from "ws";
+import { deleteGuestBook, isBookRecord, upsertGuestbook } from "./lib/book.js";
 import {
-  type Record as Book,
-  isRecord as isBook,
-} from "../client/generated/api/types/com/fujocoded/guestbook/book.js";
+  deleteSubmission,
+  isSubmissionRecord,
+  upsertSubmission,
+} from "./lib/submission.js";
 import {
-  type Record as Submission,
-  isRecord as isSubmission,
-} from "../client/generated/api/types/com/fujocoded/guestbook/submission.js";
-import {
-  type Record as Gate,
-  isRecord as isGate,
-} from "../client/generated/api/types/com/fujocoded/guestbook/gate.js";
-import { z } from "zod";
-import { deleteGuestBook, upsertGuestbook } from "./lib/book.js";
-import { deleteSubmission, upsertSubmission } from "./lib/submission.js";
-import { cursorToDate, getLastCursor, updateCursor } from "./lib/cursor.js";
-import { upsertGate } from "./lib/gate.js";
-
-const CommitEventSchema = z.object({
-  did: z.string(),
-  time_us: z.number(),
-  kind: z.literal("commit"),
-  commit: z.union([
-    z.object({
-      operation: z.enum(["create", "update"]),
-      record: z
-        .object({
-          $type: z.string(),
-        })
-        .passthrough(),
-      rev: z.string(),
-      collection: z.string(),
-      rkey: z.string(),
-      cid: z.string(),
-    }),
-    z.object({
-      operation: z.enum(["delete"]),
-      rev: z.string(),
-      collection: z.string(),
-      rkey: z.string(),
-    }),
-  ]),
-});
-type CommitEvent = z.infer<typeof CommitEventSchema>;
-
-const isBookRecord = (record: unknown): record is Book => isBook(record);
-const isSubmissionRecord = (record: unknown): record is Submission =>
-  isSubmission(record);
-const isGateRecord = (record: unknown): record is Gate => isGate(record);
+  createCursorUpdater,
+  cursorToDate,
+  getLastCursor,
+} from "./lib/cursor.js";
+import { isGateRecord, upsertGate } from "./lib/gate.js";
+import { CommitEvent, CommitEventSchema } from "./lib/commits.js";
 
 // To listen to the guestbook events in the ATmosphere we subscribe to a
 // Jetstream service using the websocket protocol (wss://).
@@ -80,40 +44,28 @@ JETSTREAM_URL.searchParams.set(
 // disconnections might cause data created during the disconnection period to be lost.
 // To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
 // last event on, and start again from there.
-let LAST_CURSOR_MICROSECONDS = await getLastCursor();
+const savedCursorMicroseconds = await getLastCursor();
+if (savedCursorMicroseconds) {
+  // If there is a saved cursor, we start again from there. If not, we'll start from
+  // where the Jetstream is currently at.
+  // TODO: figure out how to catch up from the beginning
+  console.log(
+    `Starting catch up from cursor: ${savedCursorMicroseconds} (${cursorToDate(
+      savedCursorMicroseconds
+    ).toLocaleString()})`
+  );
+  // We add the cursor parameter to the Jetstream URL so we start from the right place.
+  JETSTREAM_URL.searchParams.set("cursor", savedCursorMicroseconds.toString());
+}
+
 // We'll update the cursor once every hour of data we process.
 // Tests show we roughly process a hour of data every minute when we're catching
 // up after a restart.
 const CURSOR_UPDATE_INTERVAL_MILLISECONDS = 60 * 60 * 1000;
-if (LAST_CURSOR_MICROSECONDS) {
-  console.log(
-    `Starting catch up from cursor: ${LAST_CURSOR_MICROSECONDS} (${cursorToDate(
-      LAST_CURSOR_MICROSECONDS
-    ).toLocaleString()})`
-  );
-  JETSTREAM_URL.searchParams.set("cursor", LAST_CURSOR_MICROSECONDS.toString());
-}
-
-// TODO: if the record is a record that needs saving in the database
-// update the cursor after saving it to the database
-const maybeUpdateCursor = async (timestampMicroseconds: number) => {
-  // Orginal timestamp is in microseconds
-  const elapsedTimeMilliseconds =
-    (timestampMicroseconds - (LAST_CURSOR_MICROSECONDS ?? 0)) / 1000;
-  if (
-    !LAST_CURSOR_MICROSECONDS ||
-    elapsedTimeMilliseconds > CURSOR_UPDATE_INTERVAL_MILLISECONDS
-  ) {
-    LAST_CURSOR_MICROSECONDS = timestampMicroseconds;
-    console.log("Updating cursor...");
-    await updateCursor(LAST_CURSOR_MICROSECONDS);
-    console.log(
-      `Updated cursor to: ${LAST_CURSOR_MICROSECONDS} (${cursorToDate(
-        LAST_CURSOR_MICROSECONDS
-      ).toLocaleString()})`
-    );
-  }
-};
+const maybeUpdateCursor = createCursorUpdater({
+  startFromCursor: savedCursorMicroseconds,
+  cursorUpdateIntervalMilliseconds: CURSOR_UPDATE_INTERVAL_MILLISECONDS,
+});
 
 const ws = new WebSocket(JETSTREAM_URL);
 

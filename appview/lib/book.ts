@@ -1,8 +1,13 @@
 import { eq, and } from "drizzle-orm";
-import { type Record as Book } from "../../client/generated/api/types/com/fujocoded/guestbook/book.js";
+import {
+  type Record as Book,
+  isRecord as isBook,
+} from "../../client/generated/api/types/com/fujocoded/guestbook/book.js";
 import { db } from "../db/index.js";
 import { guestbooks, users } from "../db/schema.js";
 import { resolveBskyUserProfiles, createOrGetUser } from "./user.js";
+
+export const isBookRecord = (record: unknown): record is Book => isBook(record);
 
 export const upsertGuestbook = async ({
   book,

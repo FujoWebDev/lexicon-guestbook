@@ -2,13 +2,17 @@ import { eq, and } from "drizzle-orm";
 import {
   Record as GateRecord,
   HiddenSubmission,
+  isRecord as isGate,
 } from "../../client/generated/api/types/com/fujocoded/guestbook/gate.js";
 import { db } from "../db/index.js";
 import { hiddenSubmissions, submissions, users } from "../db/schema.js";
 import { createOrGetUser } from "./user.js";
 import { AtUri } from "@atproto/api";
 
-export type DatabaseTransaction = Parameters<
+export const isGateRecord = (record: unknown): record is GateRecord =>
+  isGate(record);
+
+type DatabaseTransaction = Parameters<
   Parameters<(typeof db)["transaction"]>[0]
 >[0];
 

@@ -1,10 +1,16 @@
 import { and, eq } from "drizzle-orm";
-import { type Record as Submission } from "../../client/generated/api/types/com/fujocoded/guestbook/submission.js";
+import {
+  type Record as Submission,
+  isRecord as isSubmission,
+} from "../../client/generated/api/types/com/fujocoded/guestbook/submission.js";
 import { db } from "../db/index.js";
 import { guestbooks, submissions, users } from "../db/schema.js";
 import { createOrGetUser } from "./user.js";
 import { getGuestbook } from "./book.js";
 import { AtUri } from "@atproto/api";
+
+export const isSubmissionRecord = (record: unknown): record is Submission =>
+  isSubmission(record);
 
 export const upsertSubmission = async ({
   submission,
