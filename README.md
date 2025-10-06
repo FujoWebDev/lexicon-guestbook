@@ -143,14 +143,6 @@ IMPORTANT: To make the AppView work, it needs to be reachable from the external
 internet at a specific address. If you have tailscale, you can use serve/funnel
 to create this address. You can also use ngrok, or cloudflare tunnels.
 
-OLD TAILSCALE:
-
-1. Run `tailscale serve https / http://localhost:3003/`
-2. Run `tailscale funnel 443 on`
-3. Run `tailscale serve status` and use the address from the funnel
-
-NEW TAILSCALE:
-
 1. Run `tailscale serve --bg http://localhost:3003`
 2. Run `tailscale funnel --bg 3003`
 3. Run `tailscale serve status` and use the address from the funnel
@@ -199,11 +191,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 - [x] Return handles of users
 - [x] Return avatars of users
-- [ ] Save user profile info to database
-- [ ] Periodically refresh user profile info in database
 - [x] Improve HTML generation
-- [ ] Accept guestbook submissions from HTML iframes
-- [ ] Check out CORS
 - [x] Allow creating guestbooks
 - [x] Handle deletions of submissions
 - [x] Handle deletions of guestbooks
@@ -212,13 +200,19 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Return hidden submissions ONLY if you're logged in
 - [ ] Handle edits of guestbook
 - [ ] Handle edits of submissions
+
+NICE TO HAVES:
+
 - [ ] DO NOT SWALLOW ERRORS and log them instead
+- [ ] Save user profile info to database
+  - [ ] Periodically refresh user profile info in database
+- [ ] Figure out if we can accept guestbook submissions from HTML iframes
+  - [ ] Try out CORS, maybe?
 
 ### Ingestor
 
 - [x] Catch up with cursor
-- [ ] Change timing of cursor save to consider all operations
-- [ ] Handle identity/account events
+- [x] Change timing of cursor save to consider all operations
 - [x] Handle deletions of submissions
 - [x] Handle deletions of guestbooks
 - [ ] Handle edits of guestbook
@@ -227,6 +221,10 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Push new database schema for hidden submissions
 - [x] Make sure hiding submissions work
 - [ ] Handle deletion of gates
+
+NICE TO HAVES:
+
+- [ ] Handle identity/account events
 
 ### CLI Client
 
@@ -260,9 +258,10 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 
 #### HTML iframe Client
 
-- [ ] Figure out how to allow submission via form
+- [ ] Figure out if we can allow submission via form
 
 #### Others
 
-- [ ] Create Astro plugin
-- [ ] Create guestbook webcomponent(?)
+- [ ] Create Astro plugin to show guestbook
+- [ ] Allow Astro plugin to set up guestbook
+- [ ] Create webcomponent to display guestbook
