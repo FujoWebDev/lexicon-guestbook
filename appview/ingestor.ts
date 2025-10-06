@@ -21,10 +21,10 @@ import {
   isRecord as isGate,
 } from "../client/generated/api/types/com/fujocoded/guestbook/gate.js";
 import { z } from "zod";
-import { handleBookEvent } from "./lib/book.js";
-import { handleSubmissionEvent } from "./lib/submission.js";
+import { deleteGuestBook, upsertGuestbook } from "./lib/book.js";
+import { deleteSubmission, upsertSubmission } from "./lib/submission.js";
 import { cursorToDate, getLastCursor, updateCursor } from "./lib/cursor.js";
-import { handleGateEvent } from "./lib/gate.js";
+import { upsertGate } from "./lib/gate.js";
 
 const CommitEventSchema = z.object({
   did: z.string(),
@@ -81,8 +81,9 @@ JETSTREAM_URL.searchParams.set(
 // To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
 // last event on, and start again from there.
 let LAST_CURSOR_MICROSECONDS = await getLastCursor();
-// We'll update the cursor once every hour of data we process
-// Tests show we roughly process a hour of data every minute
+// We'll update the cursor once every hour of data we process.
+// Tests show we roughly process a hour of data every minute when we're catching
+// up after a restart.
 const CURSOR_UPDATE_INTERVAL_MILLISECONDS = 60 * 60 * 1000;
 if (LAST_CURSOR_MICROSECONDS) {
   console.log(
@@ -138,106 +139,152 @@ ws.on("close", (code, reason) => {
 //    status changes
 ws.on("message", async (data) => {
   const rawEventData = JSON.parse(data.toString());
-  await maybeUpdateCursor(rawEventData.time_us);
+
+  // Right now we only handle guestbook-related events, which are all about
+  // "commit"ing data to the network (e.g. a new guestbook, or a deletion of a
+  // submission, etc.)
+  // TODO: handle other types of events to update user-visible identities, or to
+  // deactivate accounts.
   if (rawEventData.kind !== "commit") {
-    // Right now we only handle guestbook-related events
-    // TODO: handle other types of events to update user-visible identities, or to
-    // deactivate accounts.
+    // Every time an event is processed, we call "maybeUpdateCursor" so we know
+    // where to catch up from next time we start the program.
+    // It's called "maybe" because it will only update the cursor once for every hour
+    // of data we've processed.
+    await maybeUpdateCursor(rawEventData.time_us);
     return;
   }
+
   const eventData = CommitEventSchema.parse(rawEventData);
 
+  // We only asked to listen to guestbook-related events, so we should only get events
+  // related to guestbooks.
   if (!eventData.commit.collection.startsWith("com.fujocoded.guestbook")) {
-    console.error(`Unexpected collection type ${eventData.commit.collection}`);
-    return;
+    throw new Error(
+      `Unexpected collection type ${eventData.commit.collection}`
+    );
   }
 
   console.log("Received event:");
   console.dir(eventData, { depth: null });
 
-  if (eventData.commit.operation == "delete") {
-    // TODO: handle deleting things
-    console.log("Delete operation:");
-    console.dir(eventData, { depth: null });
-    if (
-      isSubmissionRecord({
-        $type: eventData.commit.collection,
-      })
-    ) {
-      await handleSubmissionEvent(
-        {
-          submission: undefined,
-          submissionAuthor: eventData.did,
-          submissionRecordKey: eventData.commit.rkey,
-        },
-        "delete"
-      );
+  // Once we're here, we know that the event is related to our guestbook. We then check
+  // what type of collection we're dealing with (e.g. a Book, a Submission, or a Gate), and
+  // handle it appropriately by passing the event data to the appropriate function.
+  switch (eventData.commit.collection) {
+    case "com.fujocoded.guestbook.book": {
+      await handleBookCommitEvent(eventData);
+      break;
     }
-    if (
-      isBookRecord({
-        $type: eventData.commit.collection,
-      })
-    ) {
-      await handleBookEvent(
-        {
-          author: eventData.did,
-          recordKey: eventData.commit.rkey,
-          book: undefined,
-        },
-        "delete"
-      );
+    case "com.fujocoded.guestbook.submission": {
+      await handleSubmissionCommitEvent(eventData);
+      break;
     }
-    return;
-  }
-  // Check if this event is related to an actual guestbook
-  if (isBookRecord(eventData.commit.record)) {
-    await handleBookEvent(
-      {
-        recordKey: eventData.commit.rkey,
-        book: eventData.commit.record,
-        author: eventData.did,
-      },
-      eventData.commit.operation
-    );
-    console.log(
-      `${eventData.commit.operation}d book: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
-    );
-
-    return;
+    case "com.fujocoded.guestbook.gate": {
+      await handleGateCommitEvent(eventData);
+      break;
+    }
+    default: {
+      console.error(
+        `Unexpected collection type ${eventData.commit.collection}`
+      );
+      break;
+    }
   }
 
-  // Check if this event is related to a submission to a guestbook
-  if (isSubmissionRecord(eventData.commit.record)) {
-    await handleSubmissionEvent(
-      {
-        submissionRecordKey: eventData.commit.rkey,
-        submission: eventData.commit.record,
-        submissionAuthor: eventData.did,
-      },
-      eventData.commit.operation
-    );
-    console.log(
-      `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
-    );
-
-    return;
-  }
-
-  if (isGateRecord(eventData.commit.record)) {
-    await handleGateEvent(
-      {
-        name: eventData.commit.rkey,
-        content: eventData.commit.record,
-        owner: eventData.did,
-      },
-      eventData.commit.operation
-    );
-
-    return;
-  }
-
-  console.error(`Unknown record type: ${eventData.commit.record.$type}`);
+  await maybeUpdateCursor(eventData.time_us);
 });
+
+async function handleBookCommitEvent(eventData: CommitEvent) {
+  // A book commit event will create, update, or delete a guestbook.
+  // In the case of a book, the event data will contain:
+  // - The guestbook itself, as the record in the event data
+  // - The record key of the guestbook, as the rkey in the event data
+  // - The did of the owner of the guestbook, as the did in the event data
+  if (
+    eventData.commit.operation == "create" ||
+    eventData.commit.operation == "update"
+  ) {
+    // If the record in the event data is not a book, something went very wrong!
+    if (!isBookRecord(eventData.commit.record)) {
+      throw new Error(
+        `Unexpected record type ${eventData.commit.record.$type} passed to handleBookCommitEvent`
+      );
+    }
+    await upsertGuestbook({
+      book: eventData.commit.record,
+      recordKey: eventData.commit.rkey,
+      ownerDid: eventData.did,
+    });
+  }
+  // In the case of a delete operation, everything stays the same, except that
+  // there's no record in the event data.
+  if (eventData.commit.operation == "delete") {
+    await deleteGuestBook({
+      guestbookKey: eventData.commit.rkey,
+      ownerDid: eventData.did,
+    });
+  }
+  console.log(
+    `${eventData.commit.operation}d book: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+  );
+}
+
+async function handleSubmissionCommitEvent(eventData: CommitEvent) {
+  // A submission commit event will create, update, or delete a submission.
+  // In the case of a submission, the event data will contain:
+  // - The submission itself, as the record in the event data
+  // - The record key of the submission, as the rkey in the event data
+  // - The did of the author of the submission, as the did in the event data
+  if (
+    eventData.commit.operation == "create" ||
+    eventData.commit.operation == "update"
+  ) {
+    if (!isSubmissionRecord(eventData.commit.record)) {
+      throw new Error(
+        `Unexpected record type ${eventData.commit.record.$type} passed to handleSubmissionCommitEvent`
+      );
+    }
+    await upsertSubmission({
+      submission: eventData.commit.record,
+      submissionRecordKey: eventData.commit.rkey,
+      submissionAuthor: eventData.did,
+    });
+  }
+  if (eventData.commit.operation == "delete") {
+    await deleteSubmission({
+      submissionAuthor: eventData.did,
+      submissionRecordKey: eventData.commit.rkey,
+    });
+  }
+  console.log(
+    `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+  );
+}
+
+async function handleGateCommitEvent(eventData: CommitEvent) {
+  // A gate commit event will create, update, or delete a gate.
+  // In the case of a gate, the event data will contain:
+  // - The gate itself, as the record in the event data
+  // - The record key of the gate, as the rkey in the event data
+  // - The did of the owner of the gate, as the did in the event data
+  if (eventData.commit.operation == "delete") {
+    // TODO: handle deleting gates
+  } else {
+    if (!isGateRecord(eventData.commit.record)) {
+      throw new Error(
+        `Unexpected record type ${eventData.commit.record.$type} passed to handleGateCommitEvent`
+      );
+    }
+    await upsertGate({
+      name: eventData.commit.rkey,
+      content: eventData.commit.record,
+      owner: eventData.did,
+    });
+  }
+  console.log(
+    `${eventData.commit.operation}d gate: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+  );
+}
 
 ws.on("error", (err) => {
   console.error("woopsie")!;

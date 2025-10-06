@@ -4,35 +4,32 @@ import { db } from "../db/index.js";
 import { guestbooks, users } from "../db/schema.js";
 import { resolveBskyUserProfiles, createOrGetUser } from "./user.js";
 
-export const handleBookEvent = async (
-  params: { book: Book | undefined; author: string; recordKey: string },
-  eventType: "create" | "update" | "delete"
-) => {
-  if (eventType == "create") {
-    const user = await createOrGetUser({ did: params.author });
-    await db
-      .insert(guestbooks)
-      .values({
-        recordKey: params.recordKey,
-        collection: params.book!.$type,
-        title: params.book!.title,
-        owner: user.id,
-        record: JSON.stringify(params.book),
-      })
-      .onConflictDoUpdate({
-        target: [guestbooks.recordKey, guestbooks.collection, guestbooks.owner],
-        set: {
-          title: params.book!.title,
-          record: JSON.stringify(params.book),
-        },
-      });
-  }
-  if (eventType == "delete") {
-    await deleteGuestBook({
-      guestbookKey: params.recordKey,
-      ownerDid: params.author,
+export const upsertGuestbook = async ({
+  book,
+  recordKey,
+  ownerDid,
+}: {
+  book: Book;
+  recordKey: string;
+  ownerDid: string;
+}) => {
+  const user = await createOrGetUser({ did: ownerDid });
+  await db
+    .insert(guestbooks)
+    .values({
+      recordKey: recordKey,
+      collection: book.$type,
+      title: book.title,
+      owner: user.id,
+      record: JSON.stringify(book),
+    })
+    .onConflictDoUpdate({
+      target: [guestbooks.recordKey, guestbooks.collection, guestbooks.owner],
+      set: {
+        title: book.title,
+        record: JSON.stringify(book),
+      },
     });
-  }
 };
 
 export const getGuestbooksByUser = async ({ userDid }: { userDid: string }) => {
@@ -114,7 +111,7 @@ export const getGuestbook = async ({
   };
 };
 
-const deleteGuestBook = async ({
+export const deleteGuestBook = async ({
   guestbookKey,
   ownerDid,
 }: {

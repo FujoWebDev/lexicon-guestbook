@@ -6,40 +6,7 @@ import { createOrGetUser } from "./user.js";
 import { getGuestbook } from "./book.js";
 import { AtUri } from "@atproto/api";
 
-const upsertSubmission = async (params: {
-  submission: Submission;
-  submissionRecordKey: string;
-  guestbokId: number;
-  authorId: number;
-}) => {
-  await db
-    .insert(submissions)
-    .values({
-      recordKey: params.submissionRecordKey,
-      collection: params.submission.$type,
-      createdAt: new Date(params.submission.createdAt),
-      text: params.submission.text,
-      postedTo: params.guestbokId,
-      author: params.authorId,
-      record: JSON.stringify(params.submission),
-    })
-    .onConflictDoUpdate({
-      target: [
-        submissions.author,
-        submissions.recordKey,
-        submissions.collection,
-      ],
-      // TODO: update the date to actual creation time
-      set: {
-        text: params.submission.text,
-        postedTo: params.guestbokId,
-        author: params.authorId,
-        createdAt: new Date(params.submission.createdAt),
-      },
-    });
-};
-
-const handleSubmissionUpsert = async ({
+export const upsertSubmission = async ({
   submission,
   submissionAuthor,
   submissionRecordKey,
@@ -61,15 +28,34 @@ const handleSubmissionUpsert = async ({
     throw new Error(`Attempting create or update on unknown guestbook`);
   }
 
-  await upsertSubmission({
-    submission,
-    submissionRecordKey,
-    guestbokId: guestbook.id,
-    authorId: author.id,
-  });
+  await db
+    .insert(submissions)
+    .values({
+      recordKey: submissionRecordKey,
+      collection: submission.$type,
+      createdAt: new Date(submission.createdAt),
+      text: submission.text,
+      postedTo: guestbook.id,
+      author: author.id,
+      record: JSON.stringify(submission),
+    })
+    .onConflictDoUpdate({
+      target: [
+        submissions.author,
+        submissions.recordKey,
+        submissions.collection,
+      ],
+      // TODO: update the date to actual creation time
+      set: {
+        text: submission.text,
+        postedTo: guestbook.id,
+        author: author.id,
+        createdAt: new Date(submission.createdAt),
+      },
+    });
 };
 
-const deleteSubmission = async (eventDetails: {
+export const deleteSubmission = async (eventDetails: {
   submissionAuthor: string;
   submissionRecordKey: string;
 }) => {
@@ -84,26 +70,6 @@ const deleteSubmission = async (eventDetails: {
         eq(submissions.author, author.id)
       )
     );
-};
-
-// TODO: type right
-export const handleSubmissionEvent = async (
-  eventDetails: {
-    submission: Submission | undefined;
-    submissionAuthor: string;
-    submissionRecordKey: string;
-  },
-  eventType: "create" | "update" | "delete"
-) => {
-  if (eventType == "create" || eventType == "update") {
-    const submission = eventDetails.submission;
-    if (!submission) {
-      throw new Error("Create or update event without submission data");
-    }
-    await handleSubmissionUpsert({ ...eventDetails, submission });
-  } else if (eventType == "delete") {
-    await deleteSubmission(eventDetails);
-  }
 };
 
 export const getSubmissionByGuestbook = async ({

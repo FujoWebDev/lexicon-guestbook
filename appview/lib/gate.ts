@@ -79,32 +79,27 @@ const hideSubmissions = async (
   await tx.insert(hiddenSubmissions).values(submissionsToPersist);
 };
 
-export const handleGateEvent = async (
-  gateDetails: {
-    name: string;
-    content: GateRecord;
-    owner: string;
-  },
-  eventType: "create" | "update"
-) => {
-  if (eventType == "create" || eventType == "update") {
-    if (gateDetails.name != "default") {
-      throw new Error(`Unknown gate type: ${gateDetails.name}`);
-    }
-    const content = gateDetails.content;
-
-    await db.transaction(async (tx) => {
-      // First we delete all submissions...
-      await deleteHiddenSubmissionsByUser({ did: gateDetails.owner }, tx);
-      // ...then we put them all back in
-      // TODO: do this the reasonable way (calculate the diff)
-      await hideSubmissions(
-        {
-          did: gateDetails.owner,
-          submissionsToHide: gateDetails.content.hiddenSubmissions ?? [],
-        },
-        tx
-      );
-    });
+export const upsertGate = async (gateDetails: {
+  name: string;
+  content: GateRecord;
+  owner: string;
+}) => {
+  if (gateDetails.name != "default") {
+    throw new Error(`Unknown gate type: ${gateDetails.name}`);
   }
+  const content = gateDetails.content;
+
+  await db.transaction(async (tx) => {
+    // First we delete all submissions...
+    await deleteHiddenSubmissionsByUser({ did: gateDetails.owner }, tx);
+    // ...then we put them all back in
+    // TODO: do this the reasonable way (calculate the diff)
+    await hideSubmissions(
+      {
+        did: gateDetails.owner,
+        submissionsToHide: gateDetails.content.hiddenSubmissions ?? [],
+      },
+      tx
+    );
+  });
 };
