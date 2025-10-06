@@ -1,12 +1,7 @@
-import { and, eq, getTableColumns, param } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { type Record as Submission } from "../../client/generated/api/types/com/fujocoded/guestbook/submission.js";
 import { db } from "../db/index.js";
-import {
-  guestbooks,
-  hiddenSubmissions,
-  submissions,
-  users,
-} from "../db/schema.js";
+import { guestbooks, submissions, users } from "../db/schema.js";
 import { createOrGetUser } from "./user.js";
 import { getGuestbook } from "./book.js";
 import { AtUri } from "@atproto/api";
@@ -120,24 +115,36 @@ export const getSubmissionByGuestbook = async ({
   collectionType: string;
   ownerDid: string;
 }) => {
-  return await db
-    .select({
-      ...getTableColumns(submissions),
-      hiddenAt: hiddenSubmissions.hiddenAt,
-    })
-    .from(submissions)
-    .leftJoin(guestbooks, eq(guestbooks.id, submissions.postedTo))
-    .innerJoin(users, eq(users.id, guestbooks.owner))
-    .leftJoin(
-      hiddenSubmissions,
-      eq(submissions.id, hiddenSubmissions.submissionId)
-    )
-    .where(
-      and(
-        eq(guestbooks.recordKey, guestbookKey),
-        eq(guestbooks.collection, collectionType),
-        eq(users.did, ownerDid)
-      )
-    )
-    .execute();
+  const owner = await db.query.users.findFirst({
+    where: eq(users.did, ownerDid),
+    with: {
+      guestbooks: {
+        where: and(
+          eq(guestbooks.recordKey, guestbookKey),
+          eq(guestbooks.collection, collectionType)
+        ),
+        with: {
+          submissions: {
+            with: {
+              hiddenEntries: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const guestbook = owner?.guestbooks[0];
+
+  if (!guestbook || !owner) {
+    return [];
+  }
+
+  return guestbook.submissions.map(({ hiddenEntries, ...submission }) => {
+    const [hiddenEntry] = hiddenEntries;
+    return {
+      ...submission,
+      hiddenAt: hiddenEntry?.hiddenAt ?? undefined,
+    };
+  });
 };

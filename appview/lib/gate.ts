@@ -36,25 +36,32 @@ const hideSubmissions = async (
   const atUrisToHide = await Promise.all(
     submissionsToHide.map(async (submission) => {
       const {
-        host: did,
+        host: authorDid,
         rkey,
         collection,
       } = new AtUri(submission.submissionUri);
-      const dbSubmission = await tx
-        .select()
-        .from(submissions)
-        .where(
-          and(
-            eq(submissions.collection, collection),
-            eq(submissions.recordKey, rkey),
-            eq(
-              submissions.author,
-              db.select({ id: users.id }).from(users).where(eq(users.did, did))
-            )
-          )
-        );
+      const author = await tx.query.users.findFirst({
+        where: eq(users.did, authorDid),
+      });
+
+      if (!author) {
+        return null;
+      }
+
+      const dbSubmission = await tx.query.submissions.findFirst({
+        where: and(
+          eq(submissions.collection, collection),
+          eq(submissions.recordKey, rkey),
+          eq(submissions.author, author.id)
+        ),
+      });
+
+      if (!dbSubmission) {
+        return null;
+      }
+
       return {
-        submissionId: dbSubmission[0].id,
+        submissionId: dbSubmission.id,
         hiddenBy: userId,
         hiddenAt: submission.hiddenAt
           ? new Date(submission.hiddenAt)
@@ -62,10 +69,14 @@ const hideSubmissions = async (
       };
     })
   );
-  if (!atUrisToHide.length) {
+  const submissionsToPersist = atUrisToHide.filter(
+    (entry): entry is Exclude<typeof entry, null> => entry !== null
+  );
+
+  if (!submissionsToPersist.length) {
     return;
   }
-  await tx.insert(hiddenSubmissions).values(atUrisToHide);
+  await tx.insert(hiddenSubmissions).values(submissionsToPersist);
 };
 
 export const handleGateEvent = async (
@@ -85,7 +96,7 @@ export const handleGateEvent = async (
     await db.transaction(async (tx) => {
       // First we delete all submissions...
       await deleteHiddenSubmissionsByUser({ did: gateDetails.owner }, tx);
-      // ...then we put the all back in
+      // ...then we put them all back in
       // TODO: do this the reasonable way (calculate the diff)
       await hideSubmissions(
         {
