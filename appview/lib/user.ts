@@ -5,9 +5,9 @@ import { eq } from "drizzle-orm";
 import { DidResolver } from "@atproto/identity";
 
 export const createOrGetUser = async ({ did }: { did: string }) => {
-  const user = (
-    await db.select().from(users).where(eq(users.did, did)).execute()
-  )?.[0];
+  const user = await db.query.users.findFirst({
+    where: eq(users.did, did),
+  });
   if (user) {
     return { id: user.id, did };
   }

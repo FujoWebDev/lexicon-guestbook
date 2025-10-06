@@ -1,10 +1,9 @@
-import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { Cursor } from "../db/schema.js";
 
 export const getLastCursor = async () => {
-  // TODO: figure out why typescript thinks this cannot be null
-  return (await db.select().from(Cursor).limit(1))[0]?.cursor ?? null;
+  const row = await db.query.Cursor.findFirst();
+  return row?.cursor ?? null;
 };
 
 export const cursorToDate = (cursor: number) => {
