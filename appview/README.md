@@ -1,7 +1,10 @@
 # Guestbook AppView
 
-This directory contains the code for the AppView of our guestbook. It's made of
-two separate pieces of the same puzzle:
+This directory contains the code for the AppView of our guestbook, which helps us
+build guestbook-related applications by providing us with data about guestbooks
+in the ATmosphere—that is, the ATproto network.
+
+This AppView is made of two separate pieces of the same puzzle:
 
 - [The AppView server](./index.ts), which client applications—like our [command
   line scripts](../client/cli), any "manage you guestbooks!" service, or any
@@ -12,20 +15,21 @@ two separate pieces of the same puzzle:
   the network—like a new guestbook being created, or a new comment being made or
   deleted—and storing their data
 
-In short and technical terms, the AppView server and the Ingestor share the same
-underlying database: the AppView one uses it to retrieve data about the guestbook
-and provide information to app developers, while the Ingestor fills it with new
-data as it comes in.
+In short and more technical terms, this AppView server and the Ingestor share the same
+underlying database: the AppView uses it to retrieve data about guestbooks
+and provide information to app developers, while the Ingestor fills that database
+with new data as it comes in.
 
 ## _Why_ are AppViews?
 
 If you're used to a different paradigm (or are curious by nature) you may be
-wondering: why create AppViews at all?
+wondering: why are we building "AppViews" in the first place?
 
 **AppViews help developers quickly and easily write different fun, creative and
 (hopefully) useful applications that rely on the same underlying data.** They do
 this by letting them skip some of the repetitive-but-alas-necessary work each
-needs to make their ideas happen: storing and retrieving user data.
+needs to make their ideas happen: storing and retrieving user data, and turning
+it into useful information.
 
 ### Our Guestbook AppView
 
@@ -155,4 +159,67 @@ applications on top of their hard work.
 
 ## What's _Different_ About AppViews?
 
-TBD
+### Traditional "closed" Software
+
+In traditional web software—from social networks like Twitter or Tumblr, to
+anything from Discord to Google Docs to Figma—applications are in control of
+users' data, which is kept in their own private storage. Since this data is not
+public, nor in the users' possessions, those who own these applications can
+unilaterally decide which questions external developers get to ask about that
+data, how often they can ask them, and even how much they must pay to get the
+answers they seek.
+
+This tight control on users' data gives these applications a disproportionate,
+hard-to-disrupt ability to control which other applications can exist, and
+whether they can continue existing. Without the ability for app developers (or
+users!) to let _others_ answer these questions, those who control this software
+can choose to suddenly [remove the ability to ask
+them](https://en.wikipedia.org/wiki/Reddit_API_controversy), or to [make asking
+them prohibility
+expensive](https://en.wikipedia.org/w/index.php?title=Twitter_under_Elon_Musk&oldformat=true#Aggressive_monetization_of_access)—if
+they ever let people ask them at all.
+
+### Decentralized (Federated) Software
+
+In other decentralized network applications, like the current implementation of
+Mastodon (based on ActivityPub), no single individual or company controls all
+the data. Instead, data is distributed across many independent versions of each
+application (or other compatible ones), which then use the same language to
+exchange information with each other. However, while this data can be
+communicated freely, each _instance_ of this software retains full control over
+the information of its users: account identity, storage, and functionality
+are all bound together in a single, unbreakable package.
+
+Because of this, even though these applications exchange data freely with each
+other, users cannot move their identity and data from one application to
+another: a Mastodon account, for example, cannot also be used as a Pixelfed or
+PeerTube account, even though these applications are all part of the same
+interconnected network. Without the ability to separate identity and data from
+the application where they were created, users' data remains locked into the
+type of application they chose when they first joined the network. Although
+they're able to change the specific version or hosting provider for that
+software, this still limits their freedom to explore different tools that suit
+their needs, as well as developers' ability to create new experiences that rely
+on the same underlying data. In contrast, AppViews let any application ask
+questions about users' data, regardless of where the data was created or stored.
+They also let developers choose how to aggregate and make sense of this data,
+both within a single or across multiple application, and let them create their
+own unique "view" of this data to be shared with others. Once those views are
+in place, other developers can then mix and match them to quickly build client
+applications for anyone in the ATmosphere to enjoy.
+
+In addition to this, each new application that joins this network needs to
+rebuild its own account creation, data storage, and information exchange
+systems. This means developers must invest significant resources in building
+this infrastructure before they can create new features and experiences, making
+it more cumbersome and expensive to create new applications (including
+alternatives to existing ones), and making experimentation and innovation more
+difficult. And since each application requires users to create a new account and
+find a new server to call home, switching between applications involves
+significant friction: while they can bring their social graph along, this move
+still requires users to migrate their followers, abandon their post history, and
+change their identity. In contrast, AppViews (and the other building blocks of
+ATproto) let users maintain a single identity they can use to access any
+application in the network, and a single data store that works across
+applications. This helps developers focus on building unique features rather
+than rebuilding infrastructure, and bootstrapping communities from scratch.
