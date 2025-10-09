@@ -87,26 +87,6 @@ them: **they also give developers (and their users) a choice in _who_ is going
 to answer these questions.** And similarly, they let anyone step in to answer
 questions—any question!—for others.
 
-> [!NOTE]
->
-> #### A Practical Example, pt. 2
->
-> To see how this looks in practice you can look again at how we ask Bluesky's
-> AppView for [fujocoded.bsky.social](https://fujocoded.bsky.social)'s profile
-> information:
->
-> [https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=fujocoded.bsky.social](https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=fujocoded.bsky.social)
->
-> This time, notice its shape:
->
-> - `[AppView URL]`/xrpc/
-> - `[question it's answering]`?
-> - `[details of the request]`.
->
-> Any AppView can implement `app.bsky.actor.getProfile` to signal it knows
-> how to get the profile of a Bluesky user. A developer could then change
-> `[AppView URL]` to that AppView's address and get the same answer!
-
 ### Same Questions, Multiple AnswerERs
 
 Since the data in the ATproto network is freely available, anyone can use it to
@@ -143,6 +123,26 @@ implementing different Lexicons.
 > directory](../lexicons/com/fujocoded/guestbook). They're the ones that start
 > with `get` and have `"type": "query"` in their definition.
 
+> [!NOTE]
+>
+> #### A Practical Example, pt. 2
+>
+> To see how this looks in practice you can look again at how we ask Bluesky's
+> AppView for [fujocoded.bsky.social](https://fujocoded.bsky.social)'s profile
+> information:
+>
+> [https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=fujocoded.bsky.social](https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=fujocoded.bsky.social)
+>
+> This time, notice its shape:
+>
+> - `[AppView URL]`/xrpc/
+> - `[question it's answering]`?
+> - `[details of the request]`.
+>
+> Any AppView can implement `app.bsky.actor.getProfile` to signal it knows
+> how to get the profile of a Bluesky user. A developer could then change
+> `[AppView URL]` to that AppView's address and get the same answer!
+
 ### Same AnswerERs, Multiple Questions
 
 With so much data in the network, there are many questions that can be asked
@@ -157,10 +157,12 @@ In practice, this means that:
   questions in their AppView. Similarly, this AppView could choose to also
   provide, for example, informations about a user's Bluesky profile.
 - **Not all AppViews need to answer all questions about certain data:** For
-  example, this guestbook AppView only answers guestbook-related questions. And
-  while we could extend it to also answer questions about, for example,
-  "Bluesky-shaped data", that would require more time and resources than we have
-  time and energy (and desire) to provide.
+  example, this guestbook AppView only answers guestbook-related questions.
+  However, since our guestbooks relies on Bluesky's profiles for user
+  appeareance, we could certainly decide to also provide an answer for
+  `app.bsky.actor.getProfile`. But while we could go further and answer
+  questions about any "Bluesky-shaped data", that would require more time and
+  resources than we have time and energy (and desire) to provide.
 
 When writing applications for end users, **developers don't have to use just one
 AppView**: they can mix and match different ones to create the unique experience
