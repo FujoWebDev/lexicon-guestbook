@@ -62,12 +62,13 @@ user's friends (and enemies) are, show them feeds they're subscribed to, or even
 just retrieve their Bluesky's handle and avatar to use in their own applications
 instead, without having to store and retrieve all data in the network.
 
-You can find the Bluesky AppView at
-[https://public.api.bsky.app/](https://public.api.bsky.app/), and see all the
-questions it can answer [in the Bluesky
-documentation](https://docs.bsky.app/docs/api/app-bsky-actor-get-profile).
-
 > [!TIP]
+> You can find the Bluesky AppView at
+> [https://public.api.bsky.app/](https://public.api.bsky.app/), and see all the
+> questions it can answer [in the Bluesky
+> documentation](https://docs.bsky.app/docs/api/app-bsky-actor-get-profile).
+
+> [!NOTE]
 >
 > #### A practical example
 >
@@ -86,7 +87,7 @@ them: **they also give developers (and their users) a choice in _who_ is going
 to answer these questions.** And similarly, they let anyone step in to answer
 questions—any question!—for others.
 
-> [!TIP]
+> [!NOTE]
 >
 > #### A Practical Example, pt. 2
 >
