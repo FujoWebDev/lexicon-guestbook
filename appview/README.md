@@ -45,6 +45,7 @@ this data to build apps for others to use. By lowering the barriers of entry to
 writing application code, **AppViews make it possible for more applications
 (made by a more diverse set of developers) to exist.**
 
+> [!TIP]
 > You can find the questions this AppView can answer in the
 > [`lexicons/com/fujocoded/guestbook`
 > directory](../lexicons/com/fujocoded/guestbook). They're the ones that start
@@ -66,6 +67,8 @@ You can find the Bluesky AppView at
 questions it can answer [in the Bluesky
 documentation](https://docs.bsky.app/docs/api/app-bsky-actor-get-profile).
 
+> [!TIP]
+>
 > #### A practical example
 >
 > If you need to see it to believe it (or understand it), you can find the result
@@ -83,6 +86,8 @@ them: **they also give developers (and their users) a choice in _who_ is going
 to answer these questions.** And similarly, they let anyone step in to answer
 questions—any question!—for others.
 
+> [!TIP]
+>
 > #### A Practical Example, pt. 2
 >
 > To see how this looks in practice you can look again at how we ask Bluesky's
@@ -131,6 +136,7 @@ To facilitate this ability to switch, AppViews can coordinate to be asked
 questions (and return answers) in the same language by declaring and
 implementing different Lexicons.
 
+> [!TIP]
 > Once again, you can find the questions this AppView can answer in the
 > [`lexicons/com/fujocoded/guestbook`
 > directory](../lexicons/com/fujocoded/guestbook). They're the ones that start
