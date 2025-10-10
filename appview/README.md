@@ -221,10 +221,11 @@ data to another still limits their freedom to explore different tools that suit
 their needs, and developers' ability to create new experiences on top of users'
 content.
 
-While this is a software limitation [rather than a protocol
+While the inability to fully transfer an account is a software limitation
+[rather than a protocol
 one](https://swicg.github.io/activitypub-data-portability/lola), it remains the
-status quo in the fediverse of today. In contrast, AppViews are already built
-to let any application ask questions about users' data, regardless of where the
+status quo in the fediverse of today. In contrast, AppViews are already built to
+let any application ask questions about users' data, regardless of where the
 data was created or stored. They also let developers choose how to aggregate and
 make sense of this data, both within a single or across multiple application,
 and let them create their own unique "view" of this data to be shared with
