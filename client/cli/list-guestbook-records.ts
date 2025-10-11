@@ -47,7 +47,7 @@ console.log("Authorization received!");
 console.log("******************************************************\n");
 
 console.log("Getting record...");
-const agent = new Agent(session.fetchHandler.bind(session));
+const agent = new Agent(session);
 const record = await agent.com.atproto.repo.listRecords(
   {
     repo: session.did,
