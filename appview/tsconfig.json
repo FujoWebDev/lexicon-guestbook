@@ -9,6 +9,5 @@
     "allowJs": true,
     "lib": ["ESNext"],
     "outDir": "./dist"
-  },
-  "exclude": ["site/dist/", "site/dist/**/*"]
+  }
 }

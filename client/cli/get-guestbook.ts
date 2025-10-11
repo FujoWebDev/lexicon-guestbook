@@ -1,31 +1,29 @@
-import { BskyAgent } from "@atproto/api";
-import { AtpBaseClient } from "../generated/api/index.js";
-import "dotenv/config";
+import { Agent } from "@atproto/api";
+import { getPdsUrl, getDid } from "./lib/atproto.ts";
 
-const GUESTBOOK_APPVIEW_DID = "did:web:worktop.tail2ad46.ts.net";
+const USER_HANDLE_OR_DID = "essentialrandom.bsky.social"; // Could also be "did:plc:r2vpg2iszskbkegoldmqa322"
+const GUESTBOOK_KEY = "emotional-support";
 
-const agent = new BskyAgent({ service: "https://bsky.social" });
-await agent.login({
-  identifier: "essentialrandom.bsky.social",
-  password: process.env.APP_PASSWORD!,
+const did = await getDid({ didOrHandle: USER_HANDLE_OR_DID });
+
+if (!did) {
+  throw new Error(`Did not resolve to a valid DID: ${USER_HANDLE_OR_DID}`);
+}
+
+const pdsUrl = await getPdsUrl({ didOrHandle: did });
+
+const agent = new Agent(pdsUrl);
+
+const record = await agent.com.atproto.repo.getRecord({
+  repo: did,
+  collection: "com.fujocoded.guestbook.book",
+  rkey: GUESTBOOK_KEY,
 });
 
-console.log(agent.did);
+if (!record.success) {
+  console.log("There was an error getting the record");
+  console.error(record);
+  process.exit(1);
+}
 
-const guestbookAgent = new AtpBaseClient(agent.fetchHandler);
-// TODO: check how to turn on logging for invalid responses
-guestbookAgent.setHeader(
-  "atproto-proxy",
-  `${GUESTBOOK_APPVIEW_DID}#guestbook_appview`
-);
-
-console.dir(
-  await guestbookAgent.com.fujocoded.guestbook.getGuestbook(
-    {
-      guestbookAtUri:
-        "at://did:plc:r2vpg2iszskbkegoldmqa322/com.fujocoded.guestbook.book/emotional-support",
-    },
-    {}
-  ),
-  { depth: null }
-);
+console.dir(record.data, { depth: null });

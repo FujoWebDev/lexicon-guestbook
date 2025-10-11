@@ -9,6 +9,7 @@
     "guestbook:submit": "tsx ./create-submission.ts",
     "guestbook:view-all": "tsx ./get-guestbooks.ts",
     "guestbook:view": "tsx ./get-guestbook.ts",
+    "guestbook:records:view": "tsx ./list-guestbook-records.ts",
     "guestbook:dangerously-delete-everything": "tsx ./delete-everything.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,12 +17,15 @@
   "license": "MIT",
   "dependencies": {
     "@atproto/api": "^0.14.19",
+    "@atproto/identity": "^0.4.9",
+    "@atproto/oauth-client-node": "^0.3.9",
     "@atproto/xrpc-server": "^0.9.0",
     "dotenv": "^16.4.7",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "unstorage": "^1.17.1"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0"
+    "@types/node": "^22.18.9"
   }
 }
