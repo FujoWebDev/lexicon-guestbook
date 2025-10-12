@@ -8,7 +8,7 @@
     "guestbook:create": "tsx ./create-guestbook.ts",
     "guestbook:submit": "tsx ./create-submission.ts",
     "guestbook:view-all": "tsx ./get-guestbooks.ts",
-    "guestbook:view": "tsx ./get-guestbook.ts",
+    "guestbook:view-all-auth": "tsx ./get-guestbooks-auth.ts",
     "records:list": "tsx ./list-guestbook-records.ts",
     "records:list-auth": "tsx ./list-guestbook-records-auth.ts",
     "guestbook:dangerously-delete-everything": "tsx ./delete-everything.ts"

@@ -19,8 +19,6 @@ import { randomBytes } from "node:crypto";
 
 const USER_HANDLE_OR_DID = "essentialrandom.bsky.social"; // Could also be "did:plc:r2vpg2iszskbkegoldmqa322"
 
-const oauthClient = await createClient();
-
 const authServerAddress = await startAuthServer();
 
 console.log("OAuth server is running at", authServerAddress);
@@ -28,6 +26,8 @@ console.log("\n******************************************************");
 console.log("Requesting authorization...");
 
 const authResponsePromise = waitForAuthCallback();
+
+const oauthClient = await createClient();
 const url = await oauthClient.authorize(USER_HANDLE_OR_DID, {
   scope: "atproto",
   // This random value is used to protects against CSRF (Cross-Site Request

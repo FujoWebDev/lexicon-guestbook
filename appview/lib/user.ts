@@ -23,6 +23,10 @@ export const createOrGetUser = async ({ did }: { did: string }) => {
     })
     .execute();
 
+  if (!insertedUser[0]) {
+    throw new Error(`Failed to insert user`);
+  }
+
   return { ...insertedUser[0] };
 };
 

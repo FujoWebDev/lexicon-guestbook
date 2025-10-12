@@ -14,6 +14,8 @@ export const LOCAL_SERVER_PORT = process.env.LOCAL_SERVER_PORT ?? "3000";
 const DOMAIN = new URL(process.env.EXTERNAL_DOMAIN ?? "http://127.0.0.1/");
 const IS_LOCALHOST = DOMAIN.hostname === "127.0.0.1";
 
+const SCOPES = ["atproto", "transition:generic"];
+
 // In local clients configuration for allowed scopes and redirects
 // is done through search params. In that case, the client ID must
 // also be "localhost" (not 127.0.0.1).
@@ -22,7 +24,7 @@ const CLIENT_ID = new URL(IS_LOCALHOST ? "http://localhost" : DOMAIN);
 if (IS_LOCALHOST) {
   DOMAIN.port = LOCAL_SERVER_PORT;
 
-  CLIENT_ID.searchParams.set("scope", "atproto");
+  CLIENT_ID.searchParams.set("scope", SCOPES.join(" "));
   CLIENT_ID.searchParams.set(
     "redirect_uri",
     new URL(CALLBACK_PATH, DOMAIN).toString()
@@ -36,7 +38,7 @@ export const CLIENT_METADATA: NodeOAuthClientOptions["clientMetadata"] = {
     : new URL(CLIENT_METADATA_PATH, CLIENT_ID).toString(),
   client_uri: DOMAIN.href,
   redirect_uris: [new URL(CALLBACK_PATH, DOMAIN).href],
-  scope: "atproto",
+  scope: SCOPES.join(" "),
   grant_types: ["authorization_code", "refresh_token"],
   response_types: ["code"],
   application_type: "web",
