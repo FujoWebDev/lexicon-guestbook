@@ -9,9 +9,9 @@
     "guestbook:submit": "tsx ./create-submission.ts",
     "guestbook:view-all": "tsx ./get-guestbooks.ts",
     "guestbook:view": "tsx ./get-guestbook.ts",
-    "guestbook:records:view": "tsx ./list-guestbook-records.ts",
-    "guestbook:dangerously-delete-everything": "tsx ./delete-everything.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "records:list": "tsx ./list-guestbook-records.ts",
+    "records:list-auth": "tsx ./list-guestbook-records-auth.ts",
+    "guestbook:dangerously-delete-everything": "tsx ./delete-everything.ts"
   },
   "author": "FujoCoded LLC",
   "license": "MIT",

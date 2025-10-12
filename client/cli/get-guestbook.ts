@@ -1,29 +1,34 @@
-import { Agent } from "@atproto/api";
-import { getPdsUrl, getDid } from "./lib/atproto.ts";
+/**
+ * Lists all the guestbook records owned by the user. Unlike
+ * `list-guestbook-records.ts`, this script's request is authenticated.
+ *
+ * Note this is different from the `get-guestbooks.ts` script. This script goes to a user's
+ * PDS and lists raw records. `get-guestbooks.ts` goes to our appview server and
+ * gets the guestbooks.
+ */
+import { BskyAgent } from "@atproto/api";
+import { AtpBaseClient } from "../generated/api/index.ts";
+import "dotenv/config";
 
-const USER_HANDLE_OR_DID = "essentialrandom.bsky.social"; // Could also be "did:plc:r2vpg2iszskbkegoldmqa322"
-const GUESTBOOK_KEY = "emotional-support";
+const GUESTBOOK_APPVIEW_DID = "did:web:worktop.tail2ad46.ts.net";
 
-const did = await getDid({ didOrHandle: USER_HANDLE_OR_DID });
-
-if (!did) {
-  throw new Error(`Did not resolve to a valid DID: ${USER_HANDLE_OR_DID}`);
-}
-
-const pdsUrl = await getPdsUrl({ didOrHandle: did });
-
-const agent = new Agent(pdsUrl);
-
-const record = await agent.com.atproto.repo.getRecord({
-  repo: did,
-  collection: "com.fujocoded.guestbook.book",
-  rkey: GUESTBOOK_KEY,
+const agent = new BskyAgent({ service: "https://bsky.social" });
+await agent.login({
+  identifier: "essentialrandom.bsky.social",
+  password: process.env.APP_PASSWORD!,
 });
 
-if (!record.success) {
-  console.log("There was an error getting the record");
-  console.error(record);
-  process.exit(1);
-}
+console.log(agent.did);
 
-console.dir(record.data, { depth: null });
+const guestbookAgent = new AtpBaseClient(agent.fetchHandler);
+guestbookAgent.setHeader(
+  "atproto-proxy",
+  `${GUESTBOOK_APPVIEW_DID}#guestbook_appview`
+);
+
+console.dir(
+  await guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
+    ownerDid: agent.did!,
+  }),
+  { depth: null }
+);
