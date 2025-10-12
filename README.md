@@ -52,35 +52,35 @@ operations.
 npx @atproto/lex-cli gen-api ./client/generated/api ./lexicons/**/*.json
 ```
 
-### 2. Get an App Password
-
-> Note: this is deprecated but Ms Boba doesn't care because she doesn't want to
-> implement OAuth right now.
-
-[Follow the instructions here](https://blueskyfeeds.com/en/faq-app-password).
-You will need to add this in a `.env` file within `client/`.
-
-```
-APP_PASSWORD=your_password
-```
-
-### 2. Create your Guestbook
+### 2. Create your Guestbook (using the CLI)
 
 > Remember: you need to `npm install` the dependencies first!
 
 1. Open `client/cli/create-guestbook.ts` and change things around to your
    desired data.
-2. <u>ENTER THE CLIENT DIRECTORY</u> (`cd client`)
+2. <u>ENTER THE CLI DIRECTORY</u> (`cd client/cli`)
 3. Run `npm run guestbook:create`
 
 ### 3. Post a Submission to your Guestbok (or Someone Else's)
 
 1. Open `client/cli/create-submission.ts` and change things around to your
    desired data.
-2. <u>ENTER THE CLIENT DIRECTORY</u> (`cd client`)
-3. Run `npm run guestbook:submit`
+2. <u>ENTER THE CLI DIRECTORY</u> (`cd client/cli`)
+3. Run `npm run submission:create`
 
-You can see all the submissions as they happen with the following code:
+### 4. View Guestbooks and Records
+
+The CLI provides several commands to view guestbooks and their submissions:
+
+- **List guestbook records from your PDS (unauthenticated)**: `npm run records:list`
+- **List guestbook records from your PDS (authenticated)**: `npm run records:list-auth`
+
+It also provides methods that require an AppView (the next step)
+
+- **List all guestbooks from the AppView (unauthenticated)**: `npm run guestbooks:get-all`
+- **List all guestbooks from the AppView (authenticated)**: `npm run guestbooks:get-all-auth`
+
+You can also see all the submissions as they happen with the following code:
 `websocat
 wss://jetstream2.us-east.bsky.network/subscribe\?wantedCollections=com.fujocoded.guestbook.submission
 | jq 'select(.kind == "commit")'`
@@ -160,14 +160,14 @@ scratch)! Come to the streams and stay tuned for more functionality around this.
 ## ⚠️⚠️⚠️ DANGER: Deleting Everything ⚠️⚠️⚠️
 
 Experimented too much and hate leaving a mess around? Delete everything with
-`npm run guestbook:dangerously-delete-everything`, which will (again) DELETE
+`npm run dangerously-delete-everything`, which will (again) DELETE
 EVERYTHING.
 
 To use it you should:
 
 1. Take the above steps to install the `cli` commands
-2. Enter the client directory with `cd client/`
-3. Run `npm run guestbook:dangerously-delete-everything`
+2. Enter the client directory with `cd client/cli/`
+3. Run `npm run dangerously-delete-everything`
 
 If you want to be more targeted with what you delete and to set the right values
 for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
@@ -228,10 +228,13 @@ NICE TO HAVES:
 
 ### CLI Client
 
-- [ ] Get rid of app passwords
+- [x] Get rid of app passwords
+- [x] Test that it's still working
+
+NICE TO HAVES:
+
 - [ ] Allow global configuration
 - [ ] Create initialization script
-- [ ] Test that it's still working
 
 ### Astro Client
 
