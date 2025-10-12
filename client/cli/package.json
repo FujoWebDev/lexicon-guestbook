@@ -6,12 +6,12 @@
   "type": "module",
   "scripts": {
     "guestbook:create": "tsx ./create-guestbook.ts",
-    "guestbook:submit": "tsx ./create-submission.ts",
-    "guestbook:view-all": "tsx ./get-guestbooks.ts",
-    "guestbook:view-all-auth": "tsx ./get-guestbooks-auth.ts",
+    "submission:create": "tsx ./create-submission.ts",
+    "guestbooks:get-all": "tsx ./get-guestbooks.ts",
+    "guestbooks:get-all-auth": "tsx ./get-guestbooks-auth.ts",
     "records:list": "tsx ./list-guestbook-records.ts",
     "records:list-auth": "tsx ./list-guestbook-records-auth.ts",
-    "guestbook:dangerously-delete-everything": "tsx ./delete-everything.ts"
+    "dangerously-delete-everything": "tsx ./delete-everything.ts"
   },
   "author": "FujoCoded LLC",
   "license": "MIT",
