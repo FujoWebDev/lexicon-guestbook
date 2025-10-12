@@ -3,6 +3,9 @@
  * owned by a user. Unlike `get-guestbooks-auth.ts`, this script's request is
  * authenticated.
  *
+ * Since the request is authenticated, the AppView will return the count of hidden
+ * submissions for the guestbooks of the requesting user.
+ *
  * Note this is different from the `list-guestbook-records-auth.ts` script. This
  * script goes to our appview server and gets its augmented view of the
  * guestbooks, which includes metadata like the number of submissions. Instead,
