@@ -19,7 +19,7 @@ import {
   cursorToDate,
   getLastCursor,
 } from "./lib/cursor.js";
-import { isGateRecord, upsertGate } from "./lib/gate.js";
+import { deleteGate, isGateRecord, upsertGate } from "./lib/gate.js";
 import { CommitEvent, CommitEventSchema } from "./lib/commits.js";
 
 // To listen to the guestbook events in the ATmosphere we subscribe to a
@@ -220,7 +220,10 @@ async function handleGateCommitEvent(eventData: CommitEvent) {
   // - The record key of the gate, as the rkey in the event data
   // - The did of the owner of the gate, as the did in the event data
   if (eventData.commit.operation == "delete") {
-    // TODO: handle deleting gates
+    await deleteGate({
+      name: eventData.commit.rkey,
+      owner: eventData.did,
+    });
   } else {
     if (!isGateRecord(eventData.commit.record)) {
       throw new Error(

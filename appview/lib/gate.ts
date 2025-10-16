@@ -83,6 +83,16 @@ const hideSubmissions = async (
   await tx.insert(hiddenSubmissions).values(submissionsToPersist);
 };
 
+export const deleteGate = async (gateDetails: { name: string; owner: string }) => {
+  if (gateDetails.name != "default") {
+    throw new Error(`Unknown gate type: ${gateDetails.name}`);
+  }
+
+  await db.transaction(async (tx) => {
+    await deleteHiddenSubmissionsByUser({ did: gateDetails.owner }, tx);
+  });
+};
+
 export const upsertGate = async (gateDetails: {
   name: string;
   content: GateRecord;

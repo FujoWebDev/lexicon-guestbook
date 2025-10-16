@@ -220,7 +220,7 @@ NICE TO HAVES:
 - [ ] Handle blocking of users
 - [x] Push new database schema for hidden submissions
 - [x] Make sure hiding submissions work
-- [ ] Handle deletion of gates
+- [x] Handle deletion of gates
 
 NICE TO HAVES:
 
