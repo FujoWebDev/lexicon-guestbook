@@ -46,6 +46,21 @@ export const submissions = sqliteTable(
   (t) => [unique().on(t.author, t.collection, t.recordKey)]
 );
 
+export const blockedUsers = sqliteTable(
+  "blockedUsers",
+  {
+    id: int().primaryKey({ autoIncrement: true }),
+    blockingUser: int()
+      .notNull()
+      .references(() => users.id),
+    blockedAt: int({ mode: "timestamp" }).notNull(),
+    blockedUser: int()
+      .notNull()
+      .references(() => users.id),
+  },
+  (t) => [unique().on(t.blockingUser, t.blockedUser)]
+);
+
 export const hiddenSubmissions = sqliteTable("hidden_submission", {
   id: int().primaryKey({ autoIncrement: true }),
   submissionId: int()
@@ -83,13 +98,27 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
   hiddenEntries: many(hiddenSubmissions),
 }));
 
-export const hiddenSubmissionsRelations = relations(hiddenSubmissions, ({ one }) => ({
-  submission: one(submissions, {
-    fields: [hiddenSubmissions.submissionId],
-    references: [submissions.id],
+export const hiddenSubmissionsRelations = relations(
+  hiddenSubmissions,
+  ({ one }) => ({
+    submission: one(submissions, {
+      fields: [hiddenSubmissions.submissionId],
+      references: [submissions.id],
+    }),
+    hiddenBy: one(users, {
+      fields: [hiddenSubmissions.hiddenBy],
+      references: [users.id],
+    }),
+  })
+);
+
+export const blockedUsersRelations = relations(blockedUsers, ({ one }) => ({
+  blockingUser: one(users, {
+    fields: [blockedUsers.blockingUser],
+    references: [users.id],
   }),
-  hiddenBy: one(users, {
-    fields: [hiddenSubmissions.hiddenBy],
+  blockedUser: one(users, {
+    fields: [blockedUsers.blockedUser],
     references: [users.id],
   }),
 }));

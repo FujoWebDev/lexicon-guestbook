@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import { verifyJwt, parseReqNsid, XRPCError } from "@atproto/xrpc-server";
 import { IdResolver } from "@atproto/identity";
+
 const pubKey = readFileSync("./public_jwk.json", "utf-8");
 const PORT = process.env.PORT ?? "3003";
 
@@ -119,7 +120,9 @@ server.com.fujocoded.guestbook.getGuestbook({
       ...guestbookData,
       submissions: showHiddenSubmissions
         ? guestbookData.submissions
-        : guestbookData.submissions.filter((submission) => !submission.hidden),
+        : guestbookData.submissions.filter(
+            (submission) => !submission.hidden && !submission.authorBlocked
+          ),
     };
 
     return {
@@ -156,10 +159,13 @@ server.com.fujocoded.guestbook.getGuestbooks({
               did: guestbook.ownerDid,
             },
             submissionsCount: submissions.filter(
-              (submission) => !submission.hiddenAt
+              (submission) => !submission.hiddenAt && !submission.authorBlocked
             ).length,
             hiddenSubmissionsCount: isOwnGuestbook
-              ? submissions.filter((submission) => !!submission.hiddenAt).length
+              ? submissions.filter(
+                  (submission) =>
+                    !!submission.hiddenAt && !submission.authorBlocked
+                ).length
               : undefined,
           };
         })

@@ -49,7 +49,7 @@
       "description": "A user that's blocked from posting on this PDS's guestbooks.",
       "required": ["userDid"],
       "properties": {
-        "hiddenAt": { "type": "string", "format": "datetime" },
+        "blockedAt": { "type": "string", "format": "datetime" },
         "userDid": {
           "type": "string",
           "format": "did"

@@ -6,7 +6,7 @@ import {
 import { db } from "../db/index.js";
 import { guestbooks, submissions, users } from "../db/schema.js";
 import { createOrGetUser } from "./user.js";
-import { getGuestbook } from "./book.js";
+import { getBlockedUserIds, getGuestbook } from "./book.js";
 import { AtUri } from "@atproto/api";
 
 export const isSubmissionRecord = (record: unknown): record is Submission =>
@@ -98,6 +98,7 @@ export const getSubmissionByGuestbook = async ({
         with: {
           submissions: {
             with: {
+              author: true,
               hiddenEntries: true,
             },
           },
@@ -112,11 +113,14 @@ export const getSubmissionByGuestbook = async ({
     return [];
   }
 
+  const blockedUserIds = await getBlockedUserIds({ userId: owner.id });
+
   return guestbook.submissions.map(({ hiddenEntries, ...submission }) => {
     const [hiddenEntry] = hiddenEntries;
     return {
       ...submission,
       hiddenAt: hiddenEntry?.hiddenAt ?? undefined,
+      authorBlocked: blockedUserIds.has(submission.author.id),
     };
   });
 };

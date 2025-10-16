@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch ./index.ts",
+    "build": "tsc",
     "dev:ingestor": "tsx watch ./ingestor.ts",
     "keys:generate": "tsx ./generate-keys.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,8 +16,9 @@
   "dependencies": {
     "@atproto/api": "^0.14.19",
     "@atproto/identity": "^0.4.8",
+    "@atproto/lexicon": "^0.5.1",
     "@atproto/oauth-client-node": "^0.2.17",
-    "@atproto/xrpc-server": "^0.7.17",
+    "@atproto/xrpc-server": "^0.7.19",
     "@libsql/client": "^0.15.4",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
@@ -26,6 +28,7 @@
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.0",
     "express": "^5.1.0",
+    "multiformats": "^13.4.1",
     "typescript": "^5.8.2",
     "ws": "^8.18.1",
     "zod": "^3.24.3"

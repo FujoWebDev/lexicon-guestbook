@@ -15,13 +15,12 @@
     "noUncheckedIndexedAccess": true,
 
     /* If transpiling with TypeScript: */
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
     "sourceMap": true,
     "declaration": true,
     "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "types": ["./src/types.d.ts"]
+    "noEmit": true
   },
   "include": ["./**/*.ts", "../client/generated/**/*.ts"],
   "exclude": ["node_modules"]

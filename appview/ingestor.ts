@@ -196,6 +196,10 @@ async function handleSubmissionCommitEvent(eventData: CommitEvent) {
         `Unexpected record type ${eventData.commit.record.$type} passed to handleSubmissionCommitEvent`
       );
     }
+    // We do not need to hide the submission here, because there's no way for the submission to have
+    // been hidden by a gate before it was created.
+    // If this gate owner has blocked an author, then the submission will be hidden
+    // when fetched without us needing to do anything here.
     await upsertSubmission({
       submission: eventData.commit.record,
       submissionRecordKey: eventData.commit.rkey,

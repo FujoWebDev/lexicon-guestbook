@@ -4,7 +4,7 @@ import {
   isRecord as isBook,
 } from "../../client/generated/api/types/com/fujocoded/guestbook/book.js";
 import { db } from "../db/index.js";
-import { guestbooks, users } from "../db/schema.js";
+import { guestbooks, users, blockedUsers } from "../db/schema.js";
 import { resolveBskyUserProfiles, createOrGetUser } from "./user.js";
 
 export const isBookRecord = (record: unknown): record is Book => isBook(record);
@@ -92,6 +92,8 @@ export const getGuestbook = async ({
       .filter((x): x is string => !!x),
   ]);
 
+  const blockedUserIds = await getBlockedUserIds({ userId: owner.id });
+
   return {
     id: guestbook.id,
     title: guestbook.title || undefined,
@@ -112,6 +114,7 @@ export const getGuestbook = async ({
         text: entry.text || undefined,
         createdAt: entry.createdAt.toISOString(),
         hidden: (entry.hiddenEntries ?? []).length > 0,
+        authorBlocked: blockedUserIds.has(entry.author.id),
       })) ?? [],
   };
 };
@@ -129,4 +132,13 @@ export const deleteGuestBook = async ({
     .where(
       and(eq(guestbooks.recordKey, guestbookKey), eq(guestbooks.owner, ownerId))
     );
+};
+
+export const getBlockedUserIds = async ({ userId }: { userId: number }) => {
+  const blockedUserRecords = await db.query.blockedUsers.findMany({
+    where: eq(blockedUsers.blockingUser, userId),
+  });
+  return new Set(
+    blockedUserRecords.map((blockedUserRecord) => blockedUserRecord.blockedUser)
+  );
 };
