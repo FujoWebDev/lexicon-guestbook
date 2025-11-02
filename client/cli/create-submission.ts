@@ -45,7 +45,7 @@ const guestbookAgent = new AtpBaseClient(agent.fetchHandler);
 const createReult =
   await guestbookAgent.com.fujocoded.guestbook.submission.create(
     {
-      repo: "essentialrandom.bsky.social",
+      repo: session.did,
     },
     {
       createdAt: new Date().toISOString(),

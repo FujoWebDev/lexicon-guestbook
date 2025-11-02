@@ -178,6 +178,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [ ] Display other lexicons
   - [ ] Turn the submission type returns into a union
 - [ ] Deploy the AppView
+- [ ] Figure out what's wrong with AppView types
 
 ### Lexicon
 
@@ -185,6 +186,9 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Return information on submissions visibility in queries
 - [x] Return information on submissions visibility in guestbooks list
 - [x] Allow blocking users
+
+NICE TO HAVES:
+
 - [ ] Allow restricting which URLs a guestbook is displayable on
 
 ### AppView
@@ -198,11 +202,11 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [x] Return information on submissions visibility in queries
 - [x] Return information on submissions visibility in guestbooks list
 - [x] Return hidden submissions ONLY if you're logged in
-- [ ] Handle edits of guestbook
-- [ ] Handle edits of submissions
+- [ ] Handle edits of guestbook (e.g. title)
 
 NICE TO HAVES:
 
+- [ ] Handle edits of submissions
 - [ ] DO NOT SWALLOW ERRORS and log them instead
 - [ ] Save user profile info to database
   - [ ] Periodically refresh user profile info in database
@@ -216,14 +220,14 @@ NICE TO HAVES:
 - [x] Handle deletions of submissions
 - [x] Handle deletions of guestbooks
 - [ ] Handle edits of guestbook
-- [ ] Handle edits of submissions
-- [ ] Handle blocking of users
+- [x] Handle blocking of users
 - [x] Push new database schema for hidden submissions
 - [x] Make sure hiding submissions work
 - [x] Handle deletion of gates
 
 NICE TO HAVES:
 
+- [ ] Handle edits of submissions
 - [ ] Handle identity/account events
 
 ### CLI Client
@@ -254,6 +258,7 @@ NICE TO HAVES:
 - [x] Allow deletions of submissions
 - [ ] Allow deletions of your submissions on other people's guestbooks
 - [x] Allow deletions of guestbooks
+  - [ ] Add deleting of your submissions to the guestbook at the same time
 - [x] Do Astro trick to redirect after submission
 - [x] Hide hidden submissions when logged out
 - [x] Show which submissions are hidden to a logged in user on guestbook
