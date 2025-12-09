@@ -202,11 +202,12 @@ NICE TO HAVES:
 - [x] Return information on submissions visibility in queries
 - [x] Return information on submissions visibility in guestbooks list
 - [x] Return hidden submissions ONLY if you're logged in
-- [ ] Handle edits of guestbook (e.g. title)
+- [x] Handle edits of guestbook (e.g. title)
 
 NICE TO HAVES:
 
 - [ ] Handle edits of submissions
+- [ ] Allow per-guestbook moderation overrides
 - [ ] DO NOT SWALLOW ERRORS and log them instead
 - [ ] Save user profile info to database
   - [ ] Periodically refresh user profile info in database
@@ -219,7 +220,7 @@ NICE TO HAVES:
 - [x] Change timing of cursor save to consider all operations
 - [x] Handle deletions of submissions
 - [x] Handle deletions of guestbooks
-- [ ] Handle edits of guestbook
+- [x] Handle edits of guestbook
 - [x] Handle blocking of users
 - [x] Push new database schema for hidden submissions
 - [x] Make sure hiding submissions work

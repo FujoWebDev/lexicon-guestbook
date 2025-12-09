@@ -57,6 +57,7 @@ export const upsertSubmission = async ({
         postedTo: guestbook.id,
         author: author.id,
         createdAt: new Date(submission.createdAt),
+        record: JSON.stringify(submission),
       },
     });
 };

@@ -46,6 +46,20 @@ export const submissions = sqliteTable(
   (t) => [unique().on(t.author, t.collection, t.recordKey)]
 );
 
+export const gates = sqliteTable(
+  "gates",
+  {
+    id: int().primaryKey({ autoIncrement: true }),
+    recordKey: text().notNull(),
+    collection: text().notNull(), // com.fujocoded.guestbook.gate
+    owner: int()
+      .notNull()
+      .references(() => users.id),
+    record: text({ mode: "json" }).notNull(),
+  },
+  (t) => [unique().on(t.owner, t.collection, t.recordKey)]
+);
+
 export const blockedUsers = sqliteTable(
   "blockedUsers",
   {
@@ -76,6 +90,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   guestbooks: many(guestbooks),
   submissions: many(submissions),
   hiddenSubmissions: many(hiddenSubmissions),
+  gates: many(gates),
 }));
 
 export const guestbooksRelations = relations(guestbooks, ({ one, many }) => ({
@@ -84,6 +99,13 @@ export const guestbooksRelations = relations(guestbooks, ({ one, many }) => ({
     references: [users.id],
   }),
   submissions: many(submissions),
+}));
+
+export const gatesRelations = relations(gates, ({ one }) => ({
+  owner: one(users, {
+    fields: [gates.owner],
+    references: [users.id],
+  }),
 }));
 
 export const submissionsRelations = relations(submissions, ({ one, many }) => ({

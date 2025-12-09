@@ -8,6 +8,7 @@ import {
 import { db } from "../db/index.js";
 import {
   blockedUsers,
+  gates,
   hiddenSubmissions,
   submissions,
   users,
@@ -53,13 +54,7 @@ const hideSubmissions = async (
           collection,
         } = new AtUri(submission.submissionUri);
 
-        const author = await tx.query.users.findFirst({
-          where: eq(users.did, authorDid),
-        });
-
-        if (!author) {
-          return null;
-        }
+        const author = await createOrGetUser({ did: authorDid });
 
         const dbSubmission = await tx.query.submissions.findFirst({
           where: and(
@@ -99,8 +94,16 @@ export const deleteGate = async (gateDetails: {
     throw new Error(`Unknown gate type: ${gateDetails.name}`);
   }
 
+  const user = await createOrGetUser({ did: gateDetails.owner });
+
   await db.transaction(async (tx) => {
     await deleteHiddenSubmissionsByUser({ did: gateDetails.owner }, tx);
+    await deleteBlockedUsersByUser({ did: gateDetails.owner }, tx);
+    await tx
+      .delete(gates)
+      .where(
+        and(eq(gates.recordKey, gateDetails.name), eq(gates.owner, user.id))
+      );
   });
 };
 
@@ -112,14 +115,30 @@ export const upsertGate = async (gateDetails: {
   if (gateDetails.name != "default") {
     throw new Error(`Unknown gate type: ${gateDetails.name}`);
   }
-  const content = gateDetails.content;
+
+  const user = await createOrGetUser({ did: gateDetails.owner });
 
   await db.transaction(async (tx) => {
+    // Save the gate record itself in the database
+    await tx
+      .insert(gates)
+      .values({
+        recordKey: gateDetails.name,
+        collection: gateDetails.content.$type,
+        owner: user.id,
+        record: JSON.stringify(gateDetails.content),
+      })
+      .onConflictDoUpdate({
+        target: [gates.recordKey, gates.collection, gates.owner],
+        set: {
+          record: JSON.stringify(gateDetails.content),
+        },
+      });
+
     // First we delete all submissions...
     await deleteHiddenSubmissionsByUser({ did: gateDetails.owner }, tx);
     // ...then we put them all back in
     // TODO: do this the reasonable way (calculate the diff)
-    // (calculate the diff)
     await hideSubmissions(
       {
         did: gateDetails.owner,
@@ -162,27 +181,19 @@ const blockUsers = async (
 ) => {
   const userId = (await createOrGetUser({ did })).id;
 
-  const blockedUsersInserts = (
-    await Promise.all(
-      usersToBlock.map(async (user) => {
-        const { host: blockedDid } = new AtUri(user.userDid);
+  const blockedUsersInserts = await Promise.all(
+    usersToBlock.map(async (user) => {
+      const { host: blockedDid } = new AtUri(user.userDid);
 
-        const blockedUser = await tx.query.users.findFirst({
-          where: eq(users.did, blockedDid),
-        });
+      const blockedUser = await createOrGetUser({ did: blockedDid });
 
-        if (!blockedUser) {
-          return null;
-        }
-
-        return {
-          blockedUser: blockedUser.id,
-          blockedAt: new Date(user.blockedAt ?? Date.now()),
-          blockingUser: userId,
-        };
-      })
-    )
-  ).filter(<T>(blockedUser: T): blockedUser is NonNullable<T> => !!blockedUser);
+      return {
+        blockedUser: blockedUser.id,
+        blockedAt: new Date(user.blockedAt ?? Date.now()),
+        blockingUser: userId,
+      };
+    })
+  );
 
   if (!blockedUsersInserts.length) {
     return;
