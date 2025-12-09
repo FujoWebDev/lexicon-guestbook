@@ -5,10 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch ./index.ts",
+    "dev": "tsx watch --env-file=.env ./index.ts",
     "build": "tsc",
-    "dev:ingestor": "tsx watch ./ingestor.ts",
-    "keys:generate": "tsx ./generate-keys.ts",
+    "dev:ingestor": "tsx watch --env-file=.env ./ingestor.ts",
+    "keys:generate": "tsx --env-file=.env ./generate-keys.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "FujoCoded LLC",
@@ -25,7 +25,6 @@
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.0",
     "express": "^5.1.0",
     "multiformats": "^13.4.1",

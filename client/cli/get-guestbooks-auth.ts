@@ -21,8 +21,14 @@ import {
 import { createClient } from "./lib/oauth/oauth-client.ts";
 import { randomBytes } from "node:crypto";
 
-const GUESTBOOK_APPVIEW_URL = new URL("https://worktop.tail2ad46.ts.net/");
-const GUESTBOOK_APPVIEW_DID = `did:web:${GUESTBOOK_APPVIEW_URL.hostname}`;
+const { GUESTBOOK_APPVIEW_URL } = process.env.GUESTBOOK_APPVIEW_URL as {
+  GUESTBOOK_APPVIEW_URL?: string;
+};
+if (!GUESTBOOK_APPVIEW_URL) {
+  throw new Error("You must provide a public URL for your AppView.");
+}
+
+const GUESTBOOK_APPVIEW_DID = `did:web:${new URL(GUESTBOOK_APPVIEW_URL).hostname}`;
 
 const USER_HANDLE_OR_DID = "essentialrandom.bsky.social"; // Could also be "did:plc:r2vpg2iszskbkegoldmqa322"
 

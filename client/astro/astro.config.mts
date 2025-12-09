@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 import node from "@astrojs/node";
 import authProto from "@fujocoded/authproto";
 
@@ -13,4 +13,9 @@ export default defineConfig({
       defaultDevUser: "essentialrandom.bsky.social",
     }),
   ],
+  env: {
+    schema: {
+      GUESTBOOK_APPVIEW_DOMAIN: envField.string({ context: "client", access: "public" }),
+    }
+  }
 });

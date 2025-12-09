@@ -11,6 +11,12 @@ import { IdResolver } from "@atproto/identity";
 
 const pubKey = readFileSync("./public_jwk.json", "utf-8");
 const PORT = process.env.PORT ?? "3003";
+const { APPVIEW_DOMAIN } = process.env as {
+  APPVIEW_DOMAIN?: string;
+};
+if (!APPVIEW_DOMAIN) {
+  throw new Error("You must provide a public domain for your AppView.");
+}
 
 const app = express();
 // TODO: these might need to be removed now that the Astro client is separate
@@ -20,7 +26,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 const IDENTITY_RESOLVER = new IdResolver({});
-const APPVIEW_DOMAIN = process.env.APPVIEW_DOMAIN ?? "worktop.tail2ad46.ts.net";
+
 const APPVIEW_DID = "did:web:" + APPVIEW_DOMAIN;
 app.get("/.well-known/did.json", (_, res) => {
   res.json({
