@@ -21,7 +21,7 @@ let actionSubmissionAtUri = null;
 if (deleteSubmissionResult || hideSubmissionResult) {
   if (!Astro.request.bodyUsed) {
     const body = await Astro.request.formData();
-    actionSubmissionAtUri = body.get("atUri").valueOf();
+    actionSubmissionAtUri = body.get("atUri")?.valueOf();
   }
 }
 ---

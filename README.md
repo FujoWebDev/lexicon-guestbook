@@ -178,7 +178,7 @@ for your user, you can modify `client/cli/delete-everything.ts`. Good luck!
 - [ ] Display other lexicons
   - [ ] Turn the submission type returns into a union
 - [ ] Deploy the AppView
-- [ ] Figure out what's wrong with AppView types
+- [ ] Move AppView to new Lexicon CLI
 
 ### Lexicon
 
@@ -250,8 +250,9 @@ NICE TO HAVES:
   - [x] Inform user that they are logged in
   - [x] Allow users to use their handle and not just DID
   - [x] Allow users to log out
-  - [ ] Redirect to right port on login
-  - [ ] Figure out how to configure where it goes on logout
+  - [x] Redirect to right port on login
+  - [x] Figure out how to configure where it goes on logout
+  - [ ] Configure where it goes on logout
 - [x] Allow creating guestbooks
 - [x] Allow listing guestbooks of a user
 - [x] Move Astro-based client to client directory
@@ -259,7 +260,7 @@ NICE TO HAVES:
 - [x] Allow deletions of submissions
 - [ ] Allow deletions of your submissions on other people's guestbooks
 - [x] Allow deletions of guestbooks
-  - [ ] Add deleting of your submissions to the guestbook at the same time
+  - [ ] Add deleting of (your) submissions and guestbook at the same time
 - [x] Do Astro trick to redirect after submission
 - [x] Hide hidden submissions when logged out
 - [x] Show which submissions are hidden to a logged in user on guestbook

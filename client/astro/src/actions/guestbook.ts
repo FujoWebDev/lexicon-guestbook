@@ -13,6 +13,12 @@ export const actions = {
       postedTo: z.string(),
     }),
     handler: async (input, context) => {
+      if (!context.locals.loggedInUser) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "Must be logged in to post to a guestbook",
+        });
+      }
       const guestbookAgent = await getGuestbookAgent(context.locals);
       const result =
         await guestbookAgent.com.fujocoded.guestbook.submission.create(
@@ -37,6 +43,12 @@ export const actions = {
     }),
     handler: async (input, context) => {
       const guestbookAgent = await getGuestbookAgent(context.locals);
+      if (!context.locals.loggedInUser) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "Must be logged in to create a guestbook",
+        });
+      }
       const data = await guestbookAgent.com.fujocoded.guestbook.book.create(
         {
           repo: context.locals.loggedInUser.did,
@@ -165,7 +177,7 @@ export const actions = {
         submissionUri: input.atUri,
       };
       if (
-        currentData.hiddenSubmissions.find(
+        currentData.hiddenSubmissions?.find(
           (hiddenSubmission) =>
             hiddenSubmission.submissionUri == newSubmission.submissionUri
         )
@@ -176,7 +188,7 @@ export const actions = {
           message: "You tried to hide a submission that's already hidden",
         });
       }
-      currentData.hiddenSubmissions.push(newSubmission);
+      currentData.hiddenSubmissions?.push(newSubmission);
       const data = await guestbookAgent.com.fujocoded.guestbook.gate.put(
         {
           repo: context.locals.loggedInUser.did,
@@ -233,7 +245,7 @@ export const actions = {
           })
       ).value as GateRecord;
 
-      const newSubmissions = currentData.hiddenSubmissions.filter(
+      const newSubmissions = currentData.hiddenSubmissions?.filter(
         (hiddenSubmission) => hiddenSubmission.submissionUri !== input.atUri
       );
 

@@ -96,17 +96,24 @@ const result = Astro.getActionResult(actions.deleteGuestbook);
   const dialog = document.querySelector<HTMLDialogElement>(
     "dialog.confirm-delete"
   );
-  const atUriInput = dialog.querySelector<HTMLInputElement>(
+  const atUriInput = dialog?.querySelector<HTMLInputElement>(
     'input[name="atUri"]'
   );
+  
+  if (!atUriInput) {
+    throw new Error("Couldn't find input for atUri to delete");
+  }
   const deleteButtons =
     document.querySelectorAll<HTMLButtonElement>(".deleteButton");
 
   for (const deleteButton of deleteButtons) {
-    deleteButton.addEventListener("click", (e) => {
-      dialog.showModal();
-      const atUri = deleteButton.dataset.atUri;
+    deleteButton.addEventListener("click", () => {
+      const { atUri } = deleteButton.dataset;
+      if (!atUri) {
+        return;
+      }
       atUriInput.value = atUri;
+      dialog?.showModal();
     });
   }
 </script>

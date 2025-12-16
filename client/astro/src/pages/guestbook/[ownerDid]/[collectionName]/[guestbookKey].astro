@@ -9,7 +9,7 @@ import { getGuestbookAgent } from "../../../../lib/atproto";
 import GuestbookEntry from "../../../../../components/GuestbookEntry.astro";
 import Layout from "../../../../../layouts/Layout.astro";
 
-const guestbookAtUri = AtUri.make(ownerDid, collectionName, guestbookKey);
+const guestbookAtUri = AtUri.make(ownerDid!, collectionName, guestbookKey);
 
 const guestbookAgent = await getGuestbookAgent(Astro.locals);
 const guestbookResponse =
