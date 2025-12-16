@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { AtUri } from "@atproto/api";
+import { AtUri } from "@atproto/syntax";
 import { getGuestbookAgent } from "../lib/atproto";
 import { type Record as GateRecord } from "../../../generated/api/types/com/fujocoded/guestbook/gate";
 

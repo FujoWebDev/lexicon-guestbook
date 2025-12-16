@@ -18,7 +18,7 @@
     "@astrojs/node": "^9.2.2",
     "@atproto/identity": "^0.4.8",
     "@atproto/oauth-client-node": "^0.3.3",
-    "@fujocoded/authproto": "^0.0.3",
+    "@atproto/syntax": "^0.4.2",
     "@libsql/client": "^0.15.10",
     "@oslojs/crypto": "^1.0.1",
     "astro": "^5.8.1",
