@@ -8,6 +8,12 @@ export default defineConfig({
   adapter: node({ mode: "standalone" }),
   integrations: [
     authProto({
+      driver: {
+        name: "memory"
+      },
+      scopes: {
+        genericData: true,
+      },
       applicationName: "My guestbook",
       applicationDomain: "https://authfujo.fujocoded.com",
       defaultDevUser: "essentialrandom.bsky.social",

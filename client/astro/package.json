@@ -9,7 +9,7 @@
     "build": "astro build",
     "check": "astro check",
     "db:init": "npx drizzle-kit push",
-    "preview": "astro preview"
+    "preview": "astro preview --host"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "@atproto/identity": "^0.4.8",
     "@atproto/oauth-client-node": "^0.3.3",
     "@atproto/syntax": "^0.4.2",
+    "@fujocoded/authproto": "0.1.3",
     "@libsql/client": "^0.15.10",
     "@oslojs/crypto": "^1.0.1",
     "astro": "^5.8.1",
