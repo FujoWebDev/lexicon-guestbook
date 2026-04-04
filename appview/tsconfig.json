@@ -22,6 +22,6 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["./**/*.ts", "../client/generated/**/*.ts"],
+  "include": ["./**/*.ts"],
   "exclude": ["node_modules"]
 }

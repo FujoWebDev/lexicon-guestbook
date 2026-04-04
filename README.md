@@ -18,7 +18,7 @@ The structure is as follows:
 - `appview/` contains the guestbook AppView. It collects guestbook-related
   events as they happen on the network, and offers a shared interface for
   guestbook applications to use.
-  - `appview/ingester.ts` listens to the stream of ATproto events on the
+  - `appview/ingestor.ts` listens to the stream of ATproto events on the
     network, grabs anything guestbook-related, and adds it to the AppView's
     database
   - `appview/index.ts` implements the query portion of the guestbook lexicon,
@@ -27,6 +27,19 @@ The structure is as follows:
 Right now, this is mostly a sample and teaching repo. You can watch us build
 this live (or recorded) by [following Ms Boba on
 Twitch](https://www.twitch.tv/essentialrandomness).
+
+## Run Everything in Dev
+
+From the repository root, start the Astro site, the AppView
+server, and the AppView ingestor together with:
+
+```bash
+npm install
+npm run dev
+```
+
+This also starts a `localtunnel` session for the AppView, which lets PDSes
+forward requests to the Guestbook server.
 
 ---
 
@@ -49,7 +62,7 @@ creates all the code we need to safely and more easily handle guestbook
 operations.
 
 ```bash
-npx @atproto/lex-cli gen-api ./client/generated/api ./lexicons/**/*.json
+npx @atproto/lex-cli gen-api ./client/generated/api ./lexicons/com/fujocoded/**/*.json
 ```
 
 ### 2. Create your Guestbook (using the CLI)
@@ -100,7 +113,7 @@ creates all the code we need to provide applications with server endpoints that
 respect the ATproto specifications and match the definitions in our lexicon.
 
 ```bash
-npx @atproto/lex-cli gen-server ./client/generated/server ./lexicons/**/*.json
+npx @atproto/lex-cli gen-server ./client/generated/server ./lexicons/com/fujocoded/**/*.json
 ```
 
 ### Generate a public/private key pair
@@ -137,11 +150,32 @@ need.
 1. Enter the appview directory `cd appview/`
 2. Run `npm run dev` to start serving the AppView
 
+### Build the AppView for production
+
+If you need a built JavaScript output instead of running the AppView directly
+with `tsx`, you can now build it with `tsdown`.
+
+1. Enter the appview directory with `cd appview/`
+2. Run `npm run build`
+3. Start the server with `npm run start`
+4. Start the ingestor with `npm run start:ingestor`
+
 #### Make the AppView server publicly available
 
 IMPORTANT: To make the AppView work, it needs to be reachable from the external
 internet at a specific address. If you have tailscale, you can use serve/funnel
 to create this address. You can also use ngrok, or cloudflare tunnels.
+
+If you don't like installing extra tools globally, `npm run dev` uses `npx
+localtunnel` for the AppView, captures the public hostname, and passes it into
+the existing dev servers as `APPVIEW_DOMAIN` and `GUESTBOOK_APPVIEW_DOMAIN`.
+
+To run the tunnel separately, use `npm run tunnel:appview`, which starts only
+the tunnel and prints the `APPVIEW_DOMAIN` and `GUESTBOOK_APPVIEW_DOMAIN` values
+for you to use in another terminal.
+
+If you want to skip the tunnel entirely and run just the local processes, use
+`npm run dev:stack`.
 
 1. Run `tailscale serve --bg http://localhost:3003`
 2. Run `tailscale funnel --bg 3003`
@@ -154,8 +188,20 @@ to create this address. You can also use ngrok, or cloudflare tunnels.
 
 ## Putting your Guestbook on your Website
 
-Right now, you can't (unless you want to implement the whole thing from
-scratch)! Come to the streams and stay tuned for more functionality around this.
+This repo includes an Astro client under `client/astro` that can create and
+display guestbooks on a website.
+
+### Run the Astro client
+
+1. Enter the Astro client directory with `cd client/astro`
+2. Install dependencies with `npm install --legacy-peer-deps`
+3. Start the site with `npm run dev`
+
+> [!NOTE]
+> The current published `@fujocoded/authproto` package works in this repo with
+> Astro 6, but it still declares Astro 5 peer dependencies. Until that package
+> updates its peer range, `npm install --legacy-peer-deps` is required for a
+> fresh install.
 
 ## ⚠️⚠️⚠️ DANGER: Deleting Everything ⚠️⚠️⚠️
 

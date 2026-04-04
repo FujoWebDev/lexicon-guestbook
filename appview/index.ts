@@ -63,7 +63,6 @@ const server = createServer({
     // no blobs
     blobLimit: 0,
   },
-  // @ts-expect-error TODO: investigate why this discrepancy
   // TODO: also investigate why there's no way to stop errors being swallowed
   errorParser: (err) => {
     console.error(err);
@@ -99,10 +98,17 @@ export const getDidInAuth = async (
 };
 
 server.com.fujocoded.guestbook.getGuestbook({
-  handler: async ({ params, req, auth }) => {
+  handler: async ({ params, req }) => {
     const [guestbookKey, _collectionType, ownerDid] = params.guestbookAtUri
       .split("/")
       .toReversed();
+
+    if (!guestbookKey || !ownerDid) {
+      return {
+        status: 400,
+        message: "Invalid guestbook AT URI",
+      };
+    }
 
     const isOwnGuestbook = (await getDidInAuth(req)) === ownerDid;
 

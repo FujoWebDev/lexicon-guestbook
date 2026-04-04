@@ -2,12 +2,17 @@
   "name": "guestbook-appview",
   "version": "0.0.1",
   "description": "an appview for an atproto guestbook",
-  "main": "index.js",
+  "main": "dist/index.mjs",
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env ./index.ts",
-    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "build": "tsdown",
+    "build:watch": "tsdown --watch",
     "dev:ingestor": "tsx watch --env-file=.env ./ingestor.ts",
+    "dev:all": "npm run dev & npm run dev:ingestor",
+    "start": "node --env-file=.env ./dist/index.mjs",
+    "start:ingestor": "node --env-file=.env ./dist/ingestor.mjs",
     "keys:generate": "tsx --env-file=.env ./generate-keys.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,10 +20,10 @@
   "license": "MIT",
   "dependencies": {
     "@atproto/api": "^0.14.19",
-    "@atproto/identity": "^0.4.8",
+    "@atproto/identity": "^0.4.9",
+    "@atproto/jwk-jose": "^0.1.11",
     "@atproto/lexicon": "^0.5.1",
-    "@atproto/oauth-client-node": "^0.2.17",
-    "@atproto/xrpc-server": "^0.7.19",
+    "@atproto/xrpc-server": "^0.9.5",
     "@libsql/client": "^0.15.4",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
@@ -39,6 +44,7 @@
     "@types/node": "^22.14.0",
     "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.0",
+    "tsdown": "^0.21.3",
     "tsx": "^4.19.3"
   }
 }

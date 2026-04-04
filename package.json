@@ -1,0 +1,19 @@
+{
+  "name": "guestbook-lexicon",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx ./scripts/dev-with-localtunnel.ts",
+    "dev:stack": "concurrently -k -n site,appview,ingestor -c cyan,magenta,yellow \"npm --prefix client/astro run dev\" \"npm --prefix appview run dev\" \"npm --prefix appview run dev:ingestor\"",
+    "tunnel:appview": "node --import tsx ./scripts/dev-with-localtunnel.ts --tunnel-only",
+    "dev:tunnel": "node --import tsx ./scripts/dev-with-localtunnel.ts"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^1.1.0",
+    "@types/node": "^22.18.9",
+    "commander": "^14.0.1",
+    "concurrently": "^9.2.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

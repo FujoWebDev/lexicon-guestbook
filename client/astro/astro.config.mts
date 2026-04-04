@@ -5,23 +5,28 @@ import authProto from "@fujocoded/authproto";
 // https://astro.build/config
 export default defineConfig({
   output: "server",
+  server: {
+    host: true,
+  },
   adapter: node({ mode: "standalone" }),
   integrations: [
     authProto({
       driver: {
-        name: "memory"
+        name: "memory",
       },
       scopes: {
         genericData: true,
       },
       applicationName: "My guestbook",
       applicationDomain: "https://authfujo.fujocoded.com",
-      defaultDevUser: "essentialrandom.bsky.social",
     }),
   ],
   env: {
     schema: {
-      GUESTBOOK_APPVIEW_DOMAIN: envField.string({ context: "client", access: "public" }),
-    }
-  }
+      GUESTBOOK_APPVIEW_DOMAIN: envField.string({
+        context: "client",
+        access: "public",
+      }),
+    },
+  },
 });
