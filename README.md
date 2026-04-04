@@ -30,16 +30,31 @@ Twitch](https://www.twitch.tv/essentialrandomness).
 
 ## Run Everything in Dev
 
-From the repository root, start the Astro site, the AppView
-server, and the AppView ingestor together with:
+From the repository root, start the Astro site, the AppView server, and the
+AppView ingestor together with:
 
 ```bash
 npm install
 npm run dev
 ```
 
-This also starts a `localtunnel` session for the AppView, which lets PDSes
-forward requests to the Guestbook server.
+These include:
+
+- `npm run dev` or `npm run dev:all`: Astro site + AppView + ingestor + public
+  tunnel
+- `npm run dev:client`: Astro site + public tunnel
+- `npm run dev:appview`: AppView + ingestor + public tunnel
+- `npm run dev:tunnel`: public tunnel only
+
+If you want to skip the tunnel and only run local processes:
+
+- `npm run dev:all:local`
+- `npm run dev:client:local`
+- `npm run dev:appview:local`
+
+The tunnel scripts reuse an already-running tunnel when the port/host/subdomain
+settings match, which makes it easy to start the AppView side and client side in
+separate terminals.
 
 ---
 
@@ -85,13 +100,17 @@ npx @atproto/lex-cli gen-api ./client/generated/api ./lexicons/com/fujocoded/**/
 
 The CLI provides several commands to view guestbooks and their submissions:
 
-- **List guestbook records from your PDS (unauthenticated)**: `npm run records:list`
-- **List guestbook records from your PDS (authenticated)**: `npm run records:list-auth`
+- **List guestbook records from your PDS (unauthenticated)**: `npm run
+  records:list`
+- **List guestbook records from your PDS (authenticated)**: `npm run
+  records:list-auth`
 
 It also provides methods that require an AppView (the next step)
 
-- **List all guestbooks from the AppView (unauthenticated)**: `npm run guestbooks:get-all`
-- **List all guestbooks from the AppView (authenticated)**: `npm run guestbooks:get-all-auth`
+- **List all guestbooks from the AppView (unauthenticated)**: `npm run
+  guestbooks:get-all`
+- **List all guestbooks from the AppView (authenticated)**: `npm run
+  guestbooks:get-all-auth`
 
 You can also see all the submissions as they happen with the following code:
 `websocat
@@ -166,16 +185,15 @@ IMPORTANT: To make the AppView work, it needs to be reachable from the external
 internet at a specific address. If you have tailscale, you can use serve/funnel
 to create this address. You can also use ngrok, or cloudflare tunnels.
 
-If you don't like installing extra tools globally, `npm run dev` uses `npx
-localtunnel` for the AppView, captures the public hostname, and passes it into
-the existing dev servers as `APPVIEW_DOMAIN` and `GUESTBOOK_APPVIEW_DOMAIN`.
+Running from the top-level folder of this repo, you can use these commands:
 
-To run the tunnel separately, use `npm run tunnel:appview`, which starts only
-the tunnel and prints the `APPVIEW_DOMAIN` and `GUESTBOOK_APPVIEW_DOMAIN` values
-for you to use in another terminal.
+- `npm run dev:appview` for the AppView server + ingestor + tunnel
+- `npm run dev:tunnel` for the tunnel only
+- `npm run dev:appview:local` for the AppView server + ingestor without a tunnel
 
-If you want to skip the tunnel entirely and run just the local processes, use
-`npm run dev:stack`.
+These set `APPVIEW_DOMAIN` and `GUESTBOOK_APPVIEW_DOMAIN` from the public tunnel
+hostname. If a matching tunnel is already running, they reuse it instead of
+starting a second one.
 
 1. Run `tailscale serve --bg http://localhost:3003`
 2. Run `tailscale funnel --bg 3003`
@@ -193,21 +211,26 @@ display guestbooks on a website.
 
 ### Run the Astro client
 
+From the repo root:
+
+1. `npm run dev:client` to start the Astro site with a public AppView tunnel
+2. `npm run dev:client:local` to start only the Astro site
+
+Or, if you specifically want to work inside the Astro package:
+
 1. Enter the Astro client directory with `cd client/astro`
 2. Install dependencies with `npm install --legacy-peer-deps`
 3. Start the site with `npm run dev`
 
-> [!NOTE]
-> The current published `@fujocoded/authproto` package works in this repo with
-> Astro 6, but it still declares Astro 5 peer dependencies. Until that package
-> updates its peer range, `npm install --legacy-peer-deps` is required for a
-> fresh install.
+> [!NOTE] The current published `@fujocoded/authproto` package works in this
+> repo with Astro 6, but it still declares Astro 5 peer dependencies. Until that
+> package updates its peer range, `npm install --legacy-peer-deps` is required
+> for a fresh install.
 
 ## ⚠️⚠️⚠️ DANGER: Deleting Everything ⚠️⚠️⚠️
 
 Experimented too much and hate leaving a mess around? Delete everything with
-`npm run dangerously-delete-everything`, which will (again) DELETE
-EVERYTHING.
+`npm run dangerously-delete-everything`, which will (again) DELETE EVERYTHING.
 
 To use it you should:
 

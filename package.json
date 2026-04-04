@@ -3,10 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --import tsx ./scripts/dev-with-localtunnel.ts",
-    "dev:stack": "concurrently -k -n site,appview,ingestor -c cyan,magenta,yellow \"npm --prefix client/astro run dev\" \"npm --prefix appview run dev\" \"npm --prefix appview run dev:ingestor\"",
-    "tunnel:appview": "node --import tsx ./scripts/dev-with-localtunnel.ts --tunnel-only",
-    "dev:tunnel": "node --import tsx ./scripts/dev-with-localtunnel.ts"
+    "dev": "npm run dev:all",
+    "dev:all": "node --import tsx ./scripts/dev-public.ts --target all",
+    "dev:all:local": "concurrently -k -n site,appview,ingestor -c cyan,magenta,yellow \"npm --prefix client/astro run dev\" \"npm --prefix appview run dev\" \"npm --prefix appview run dev:ingestor\"",
+    "dev:client": "node --import tsx ./scripts/dev-public.ts --target client",
+    "dev:client:local": "npm --prefix client/astro run dev",
+    "dev:appview": "node --import tsx ./scripts/dev-public.ts --target appview",
+    "dev:appview:local": "concurrently -k -n appview,ingestor -c magenta,yellow \"npm --prefix appview run dev\" \"npm --prefix appview run dev:ingestor\"",
+    "dev:tunnel": "node --import tsx ./scripts/dev-public.ts --target tunnel"
   },
   "devDependencies": {
     "@clack/prompts": "^1.1.0",
