@@ -4,7 +4,7 @@
   "defs": {
     "main": {
       "type": "record",
-      "key": "record-key",
+      "key": "tid",
       "description": "Record defining interaction rules for one or more guestbooks. The default key is used for rules applicable to all guestbooks. Users can define additional keys for custom sets of rules and map them to one or more guestbooks.",
       "record": {
         "type": "object",

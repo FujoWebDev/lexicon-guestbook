@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "lexicons": [
+    "com.atproto.repo.createRecord",
+    "com.atproto.repo.deleteRecord",
+    "com.atproto.repo.getRecord",
+    "com.atproto.repo.putRecord"
+  ],
+  "resolutions": {
+    "com.atproto.repo.createRecord": {
+      "uri": "at://did:plc:6msi3pj7krzih5qxqtryxlzw/com.atproto.lexicon.schema/com.atproto.repo.createRecord",
+      "cid": "bafyreihyvpmy2l4ou2v5etx25j5lbqty6tvna7gsxdqge76rbb7gltulei"
+    },
+    "com.atproto.repo.defs": {
+      "uri": "at://did:plc:6msi3pj7krzih5qxqtryxlzw/com.atproto.lexicon.schema/com.atproto.repo.defs",
+      "cid": "bafyreigmp5xfpkhnmwr3l5o626ued2gc2ouioykj2tpgqjqqajvbvm3wlm"
+    },
+    "com.atproto.repo.deleteRecord": {
+      "uri": "at://did:plc:6msi3pj7krzih5qxqtryxlzw/com.atproto.lexicon.schema/com.atproto.repo.deleteRecord",
+      "cid": "bafyreibwdxbyhuuljujl7g4ylwdso2x2ov6yv6nk3ext3sr7kjvvubkula"
+    },
+    "com.atproto.repo.getRecord": {
+      "uri": "at://did:plc:6msi3pj7krzih5qxqtryxlzw/com.atproto.lexicon.schema/com.atproto.repo.getRecord",
+      "cid": "bafyreihdnm3v25uaptt5vjvnpfsfgb6fbhxew2ye3l6q4ndm7xi5wpc4vy"
+    },
+    "com.atproto.repo.putRecord": {
+      "uri": "at://did:plc:6msi3pj7krzih5qxqtryxlzw/com.atproto.lexicon.schema/com.atproto.repo.putRecord",
+      "cid": "bafyreigevzo2cypxpaj5re2u35so36df4rkgx6oh4zpi4zwicfvzqfdqpa"
+    }
+  }
+}
