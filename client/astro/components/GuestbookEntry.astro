@@ -1,9 +1,9 @@
 ---
 import type { AtUri } from "@atproto/syntax";
-import type { SubmissionView } from "../../generated/api/types/com/fujocoded/guestbook/defs";
 import { actions } from "astro:actions";
+import { fujocoded } from "../generated/com";
 
-interface Props extends SubmissionView {
+interface Props extends fujocoded.guestbook.defs.SubmissionView {
   guestbookAtUri: AtUri;
 }
 

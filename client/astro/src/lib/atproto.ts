@@ -1,20 +1,16 @@
 import type { APIContext } from "astro";
-import { AtpBaseClient as GuestbookClient } from "../../../../client/generated/api/index";
 import { DidResolver } from "@atproto/identity";
+import { Client } from "@atproto/lex";
+
 import { GUESTBOOK_APPVIEW_DOMAIN } from "astro:env/client";
 
 export const getGuestbookAgent = async (locals: APIContext["locals"]) => {
-  const guestbookAgent = new GuestbookClient(
-    locals.loggedInUser
-      ? locals.loggedInUser.fetchHandler
-      : { service: `https://${GUESTBOOK_APPVIEW_DOMAIN}` }
+  return new Client(
+    locals.loggedInUser?.loggedInClient ?? "https://public.api.bsky.app",
+    {
+      service: `did:web:${GUESTBOOK_APPVIEW_DOMAIN}#guestbook_appview`,
+    },
   );
-  guestbookAgent.setHeader(
-    "atproto-proxy",
-    `did:web:${GUESTBOOK_APPVIEW_DOMAIN}#guestbook_appview`
-  );
-
-  return guestbookAgent;
 };
 
 const IDENTITY_RESOLVER = new DidResolver({});

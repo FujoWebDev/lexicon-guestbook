@@ -8,26 +8,24 @@ import { AtUri } from "@atproto/syntax";
 import { getGuestbookAgent } from "../../../../lib/atproto";
 import GuestbookEntry from "../../../../../components/GuestbookEntry.astro";
 import Layout from "../../../../../layouts/Layout.astro";
+import { fujocoded } from "../../../../../generated/com";
 
 const guestbookAtUri = AtUri.make(ownerDid!, collectionName, guestbookKey);
 
+// The guestbook agent is our authenticated client that knows how to fetch
+// data for our guestbook from an AppView that implements the fujocoded
+// guestbook data-fetching endpoints.
+// In this case, we use the "com.fujocoded.guestbook.getGuestbook" method
+// to get the guestbook data, passing its AtUri as a parameter.
 const guestbookAgent = await getGuestbookAgent(Astro.locals);
-const guestbookResponse =
-  // The guestbook agent is our authenticated client that knows how to fetch
-  // data for our guestbook from an AppView that implements the fujocoded
-  // guestbook data-fetching endpoints.
-  // In this case, we use the "com.fujocoded.guestbook.getGuestbook" method
-  // to get the guestbook data, passing its AtUri as a parameter.
-  await guestbookAgent.com.fujocoded.guestbook.getGuestbook({
+const guestbookData = await guestbookAgent.call(
+  fujocoded.guestbook.getGuestbook,
+  {
     guestbookAtUri: guestbookAtUri.toString(),
     showHidden: !!Astro.locals.loggedInUser,
-  });
+  },
+);
 
-if (!guestbookResponse.success) {
-  throw new Error("Problem with the guestbook");
-}
-
-const guestbookData = guestbookResponse.data;
 const result = Astro.getActionResult(actions.postToGuestbook);
 ---
 

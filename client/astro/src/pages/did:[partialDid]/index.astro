@@ -3,23 +3,31 @@
 // This is an unchanging identifier of this specific user across
 // the whole ATproto network.
 const { partialDid } = Astro.params;
-import { AtUri } from "@atproto/syntax";
+import { AtUri, isValidDid, isValidHandle } from "@atproto/syntax";
 import CreateGuestbookForm from "../../../components/CreateGuestbookForm.astro";
 import { didToHandle, getGuestbookAgent } from "../../lib/atproto";
 import Layout from "../../../layouts/Layout.astro";
 import { actions } from "astro:actions";
+import { fujocoded } from "../../../generated/com";
 
-const ownerDid = "did:" + partialDid;
+const ownerDid = `did:${partialDid}`;
+if (!isValidDid(ownerDid)) {
+  return new Response(null, { status: 404 });
+}
+
 const ownerHandle = await didToHandle(ownerDid);
+if (!isValidHandle(ownerHandle)) {
+  return new Response(null, { status: 404 });
+}
 
 const guestbookAgent = await getGuestbookAgent(Astro.locals);
-const guestbooks = await guestbookAgent.com.fujocoded.guestbook.getGuestbooks({
-  ownerDid,
-});
 
-if (!guestbooks.success) {
-  throw new Error(`There was an error fetching the data for ${ownerDid}`);
-}
+const guestbooksData = await guestbookAgent.call(
+  fujocoded.guestbook.getGuestbooks,
+  {
+    ownerDid,
+  },
+);
 
 const result = Astro.getActionResult(actions.deleteGuestbook);
 ---
@@ -40,7 +48,7 @@ const result = Astro.getActionResult(actions.deleteGuestbook);
     }
     <ul>
       {
-        guestbooks.data.guestbooks.map((guestbook) => {
+        guestbooksData.guestbooks.map((guestbook) => {
           const guestbookAtUri = new AtUri(guestbook.atUri);
           return (
             <li>
@@ -94,12 +102,12 @@ const result = Astro.getActionResult(actions.deleteGuestbook);
 
 <script>
   const dialog = document.querySelector<HTMLDialogElement>(
-    "dialog.confirm-delete"
+    "dialog.confirm-delete",
   );
   const atUriInput = dialog?.querySelector<HTMLInputElement>(
-    'input[name="atUri"]'
+    'input[name="atUri"]',
   );
-  
+
   if (!atUriInput) {
     throw new Error("Couldn't find input for atUri to delete");
   }
