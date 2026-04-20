@@ -30,56 +30,97 @@ import { CommitEvent, CommitEventSchema } from "./lib/commits.js";
 // Full Jetstream configuration options are at: https://github.com/bluesky-social/jetstream?tab=readme-ov-file#consuming-jetstream
 const JETSTREAM_URL = new URL(
   "subscribe",
-  "wss://jetstream2.us-east.bsky.network/"
+  "wss://jetstream2.us-east.bsky.network/",
 );
 
 // What events do we want to be sent? Anything related to com.fujocoded.guestbook!
 JETSTREAM_URL.searchParams.set(
   "wantedCollections",
-  "com.fujocoded.guestbook.*"
+  "com.fujocoded.guestbook.*",
 );
-
-// When do we want to start reading events from? By default, the Jetstream will
-// collect events starting from the moment it connects. This means that temporary
-// disconnections might cause data created during the disconnection period to be lost.
-// To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
-// last event on, and start again from there.
-const savedCursorMicroseconds = await getLastCursor();
-if (savedCursorMicroseconds) {
-  // If there is a saved cursor, we start again from there. If not, we'll start from
-  // where the Jetstream is currently at.
-  // TODO: figure out how to catch up from the beginning
-  console.log(
-    `Starting catch up from cursor: ${savedCursorMicroseconds} (${cursorToDate(
-      savedCursorMicroseconds
-    ).toLocaleString()})`
-  );
-  // We add the cursor parameter to the Jetstream URL so we start from the right place.
-  JETSTREAM_URL.searchParams.set("cursor", savedCursorMicroseconds.toString());
-}
 
 // We'll update the cursor once every hour of data we process.
 // Tests show we roughly process a hour of data every minute when we're catching
 // up after a restart.
 const CURSOR_UPDATE_INTERVAL_MILLISECONDS = 60 * 60 * 1000;
-const maybeUpdateCursor = createCursorUpdater({
-  startFromCursor: savedCursorMicroseconds,
-  cursorUpdateIntervalMilliseconds: CURSOR_UPDATE_INTERVAL_MILLISECONDS,
-});
 
-const ws = new WebSocket(JETSTREAM_URL);
+// Reconnect policy. Jetstream connections can drop (network issue, server
+// restart) and the ws library does NOT reconnect on its own.
+// This is hard to detect because the only visible symptom is that
+// the app view returns stale data.
+const INITIAL_BACKOFF_MS = 1_000;
+const MAX_BACKOFF_MS = 60_000;
 
-// First, we define what happens when the connection to the Jetstream starts
-// and ends. In our case, these are mostly courtesy messages.
-ws.on("open", () => {
-  console.log("Starting to listen");
-  console.log("Ready to glomp your guestbook events *glomps u too*");
-});
+let backoffMs = INITIAL_BACKOFF_MS;
+let reconnectTimer: NodeJS.Timeout | null = null;
+let maybeUpdateCursor: ReturnType<typeof createCursorUpdater>;
 
-ws.on("close", (code, reason) => {
-  console.log("Byeeeeeee");
-  console.log(code, reason);
-});
+async function connect() {
+  // When do we want to start reading events from? By default, the Jetstream will
+  // collect events starting from the moment it connects. This means that temporary
+  // disconnections might cause data created during the disconnection period to be lost.
+  // To fix this, we use a "cursor" (that is, a timestamp) to save the time we read our
+  // last event on, and start again from there.
+  const savedCursorMicroseconds = await getLastCursor();
+  // Duplicate url so we don't update the canonical one
+  const url = new URL(JETSTREAM_URL);
+  if (savedCursorMicroseconds) {
+    // If there is a saved cursor, we start again from there. If not, we'll start from
+    // where the Jetstream is currently at.
+    // TODO: figure out how to catch up from the beginning
+    console.log(
+      `Starting catch up from cursor: ${savedCursorMicroseconds} (${cursorToDate(
+        savedCursorMicroseconds,
+      ).toLocaleString()})`,
+    );
+    // We add the cursor parameter to the Jetstream URL so we start from the right place.
+    url.searchParams.set("cursor", savedCursorMicroseconds.toString());
+  }
+
+  maybeUpdateCursor = createCursorUpdater({
+    startFromCursor: savedCursorMicroseconds,
+    cursorUpdateIntervalMilliseconds: CURSOR_UPDATE_INTERVAL_MILLISECONDS,
+  });
+
+  const ws = new WebSocket(url);
+
+  // First, we define what happens when the connection to the Jetstream starts
+  // and ends. In our case, these are mostly courtesy messages.
+  ws.on("open", () => {
+    console.log("Starting to listen");
+    console.log("Ready to glomp your guestbook events *glomps u too*");
+    // Reset backoff once a connection stabilizes so the next drop retries fast.
+    backoffMs = INITIAL_BACKOFF_MS;
+  });
+
+  ws.on("close", (code, reason) => {
+    console.log("Byeeeeeee");
+    console.log(code, reason);
+    scheduleReconnect();
+  });
+
+  ws.on("error", (err) => {
+    console.error("woopsie")!;
+    console.error(err);
+    // The ws library fires 'error' then 'close', so let close handle the reconnect.
+  });
+
+  ws.on("message", handleMessage);
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return;
+  console.log(`Reconnecting in ${backoffMs}ms...`);
+  const delay = backoffMs;
+  backoffMs = Math.min(backoffMs * 2, MAX_BACKOFF_MS);
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connect().catch((err) => {
+      console.error("Reconnect failed:", err);
+      scheduleReconnect();
+    });
+  }, delay);
+}
 
 // Then, we define what happens when a new event happens on the network.
 // A Jetstream will call this function on 3 types of event:
@@ -89,7 +130,7 @@ ws.on("close", (code, reason) => {
 //      (e.g. their handle)
 // 3) An "account" event for when accounts get deactivated, or taken down, or undergo
 //    status changes
-ws.on("message", async (data) => {
+async function handleMessage(data: WebSocket.RawData) {
   const rawEventData = JSON.parse(data.toString());
 
   // Right now we only handle guestbook-related events, which are all about
@@ -112,7 +153,7 @@ ws.on("message", async (data) => {
   // related to guestbooks.
   if (!eventData.commit.collection.startsWith("com.fujocoded.guestbook")) {
     throw new Error(
-      `Unexpected collection type ${eventData.commit.collection}`
+      `Unexpected collection type ${eventData.commit.collection}`,
     );
   }
 
@@ -137,14 +178,14 @@ ws.on("message", async (data) => {
     }
     default: {
       console.error(
-        `Unexpected collection type ${eventData.commit.collection}`
+        `Unexpected collection type ${eventData.commit.collection}`,
       );
       break;
     }
   }
 
   await maybeUpdateCursor(eventData.time_us);
-});
+}
 
 async function handleBookCommitEvent(eventData: CommitEvent) {
   // A book commit event will create, update, or delete a guestbook.
@@ -159,7 +200,7 @@ async function handleBookCommitEvent(eventData: CommitEvent) {
     // If the record in the event data is not a book, something went very wrong!
     if (!isBookRecord(eventData.commit.record)) {
       throw new Error(
-        `Unexpected record type ${eventData.commit.record.$type} passed to handleBookCommitEvent`
+        `Unexpected record type ${eventData.commit.record.$type} passed to handleBookCommitEvent`,
       );
     }
     await upsertGuestbook({
@@ -177,7 +218,7 @@ async function handleBookCommitEvent(eventData: CommitEvent) {
     });
   }
   console.log(
-    `${eventData.commit.operation}d book: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+    `${eventData.commit.operation}d book: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`,
   );
 }
 
@@ -193,7 +234,7 @@ async function handleSubmissionCommitEvent(eventData: CommitEvent) {
   ) {
     if (!isSubmissionRecord(eventData.commit.record)) {
       throw new Error(
-        `Unexpected record type ${eventData.commit.record.$type} passed to handleSubmissionCommitEvent`
+        `Unexpected record type ${eventData.commit.record.$type} passed to handleSubmissionCommitEvent`,
       );
     }
     // We do not need to hide the submission here, because there's no way for the submission to have
@@ -213,7 +254,7 @@ async function handleSubmissionCommitEvent(eventData: CommitEvent) {
     });
   }
   console.log(
-    `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+    `${eventData.commit.operation}d submission: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`,
   );
 }
 
@@ -231,7 +272,7 @@ async function handleGateCommitEvent(eventData: CommitEvent) {
   } else {
     if (!isGateRecord(eventData.commit.record)) {
       throw new Error(
-        `Unexpected record type ${eventData.commit.record.$type} passed to handleGateCommitEvent`
+        `Unexpected record type ${eventData.commit.record.$type} passed to handleGateCommitEvent`,
       );
     }
     await upsertGate({
@@ -241,11 +282,8 @@ async function handleGateCommitEvent(eventData: CommitEvent) {
     });
   }
   console.log(
-    `${eventData.commit.operation}d gate: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`
+    `${eventData.commit.operation}d gate: ${eventData.did}/${eventData.kind}/${eventData.commit.rkey}`,
   );
 }
 
-ws.on("error", (err) => {
-  console.error("woopsie")!;
-  console.error(err);
-});
+await connect();

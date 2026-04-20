@@ -24,20 +24,19 @@ const CreateOrUpdateOperationSchema = z.object({
 
 // This is what a delete operation committed to the network looks like.
 // Unlike the create or update operation, this one doesn't include a record—it was,
-// after all, deleted.
+// after all, deleted. Jetstream also omits `cid` for deletes (there is no record
+// to CID), and `rev` is not always emitted, so both are optional here.
 //
 // It includes:
 // - operation: the operation that was committed, in this case "delete"
 // - collection: the collection of the record (usually the name of a record Lexicon, e.g. "com.fujocoded.guestbook.book")
 // - rkey: the rkey of the record, which uniquely identifies the record within the collection
-// - rev: the revision of the record (TODO: explain)
-// - cid: the cid of the record (TODO: explain)
 const DeleteOperationSchema = z.object({
   operation: z.enum(["delete"]),
   collection: z.string(),
   rkey: z.string(),
-  rev: z.string(),
-  cid: z.string(),
+  rev: z.string().optional(),
+  cid: z.string().optional(),
 });
 
 // This is what the full commit events from the Jetstream look like.

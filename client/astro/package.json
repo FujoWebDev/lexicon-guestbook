@@ -19,7 +19,7 @@
     "@atproto/identity": "^0.4.12",
     "@atproto/lex": "^0.0.25",
     "@atproto/syntax": "^0.5.4",
-    "@fujocoded/authproto": "0.2.1",
+    "@fujocoded/authproto": "^0.3.0",
     "astro": "^6.0.4",
     "typescript": "^5.8.3"
   }

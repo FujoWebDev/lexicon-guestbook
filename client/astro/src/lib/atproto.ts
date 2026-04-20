@@ -6,7 +6,7 @@ import { GUESTBOOK_APPVIEW_DOMAIN } from "astro:env/client";
 
 export const getGuestbookAgent = async (locals: APIContext["locals"]) => {
   return new Client(
-    locals.loggedInUser?.loggedInClient ?? "https://public.api.bsky.app",
+    locals.loggedInClient ?? `https://${GUESTBOOK_APPVIEW_DOMAIN}`,
     {
       service: `did:web:${GUESTBOOK_APPVIEW_DOMAIN}#guestbook_appview`,
     },

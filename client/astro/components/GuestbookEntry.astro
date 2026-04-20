@@ -2,6 +2,7 @@
 import type { AtUri } from "@atproto/syntax";
 import { actions } from "astro:actions";
 import { fujocoded } from "../generated/com";
+import { getActionInput } from "../src/middleware";
 
 interface Props extends fujocoded.guestbook.defs.SubmissionView {
   guestbookAtUri: AtUri;
@@ -16,14 +17,9 @@ const authorLink = author.handle
 
 const deleteSubmissionResult = Astro.getActionResult(actions.deleteSubmission);
 const hideSubmissionResult = Astro.getActionResult(actions.hideSubmission);
-
-let actionSubmissionAtUri = null;
-if (deleteSubmissionResult || hideSubmissionResult) {
-  if (!Astro.request.bodyUsed) {
-    const body = await Astro.request.formData();
-    actionSubmissionAtUri = body.get("atUri")?.valueOf();
-  }
-}
+const actionSubmissionAtUri =
+  getActionInput(Astro.locals, actions.deleteSubmission)?.atUri ??
+  getActionInput(Astro.locals, actions.hideSubmission)?.atUri;
 ---
 
 <article

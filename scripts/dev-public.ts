@@ -10,8 +10,12 @@ const DEFAULT_PORT = "3003";
 const DEFAULT_LOCAL_HOST = "127.0.0.1";
 const NPM_COMMAND = process.platform === "win32" ? "npm.cmd" : "npm";
 const NPX_COMMAND = process.platform === "win32" ? "npx.cmd" : "npx";
-const PUBLIC_URL_PATTERN = /https?:\/\/[^\s]+/;
-const TUNNEL_STATE_FILE = join(tmpdir(), "guestbook-localtunnel.json");
+// Match the public URL Cloudflare prints inside its boxed startup banner,
+// while ignoring api.trycloudflare.com (the control-plane endpoint, also
+// emitted by cloudflared but not the tunnel URL we want).
+const PUBLIC_URL_PATTERN =
+  /https:\/\/(?!api\.trycloudflare\.com)[^\s|]+\.trycloudflare\.com/;
+const TUNNEL_STATE_FILE = join(tmpdir(), "guestbook-cloudflared.json");
 const DEV_TARGETS = ["all", "client", "appview", "tunnel"] as const;
 
 type DevTarget = (typeof DEV_TARGETS)[number];
@@ -20,8 +24,6 @@ type Options = {
   target: DevTarget;
   port: string;
   localHost: string;
-  host?: string;
-  subdomain?: string;
 };
 
 type TunnelState = {
@@ -29,8 +31,6 @@ type TunnelState = {
   url: string;
   port: string;
   localHost: string;
-  host?: string;
-  subdomain?: string;
 };
 
 class SignalTrap {
@@ -92,13 +92,16 @@ class TunnelSession {
 
   static async open(options: Options) {
     const existingTunnel = this.#getExisting(options);
-    if (existingTunnel) {
+    if (existingTunnel && (await this.#isReachable(existingTunnel.url))) {
       return new TunnelSession(existingTunnel.url, "existing");
+    }
+    if (existingTunnel) {
+      this.#clearState(existingTunnel.pid);
     }
 
     const status = spinner();
     status.start(
-      `Starting localtunnel for AppView on http://${options.localHost}:${options.port}`,
+      `Starting cloudflared tunnel for AppView on http://${options.localHost}:${options.port}`,
     );
 
     const child = spawn(NPX_COMMAND, this.#buildArgs(options), {
@@ -132,34 +135,38 @@ class TunnelSession {
     }
   }
 
-  static #buildArgs({ port, localHost, host, subdomain }: Options) {
-    const args = [
+  static #buildArgs({ port, localHost }: Options) {
+    return [
       "--yes",
-      "localtunnel",
-      "--port",
-      port,
-      "--local-host",
-      localHost,
+      "cloudflared",
+      "tunnel",
+      "--no-autoupdate",
+      "--url",
+      `http://${localHost}:${port}`,
     ];
-
-    if (host) {
-      args.push("--host", host);
-    }
-
-    if (subdomain) {
-      args.push("--subdomain", subdomain);
-    }
-
-    return args;
   }
 
   static #matches(state: TunnelState, options: Options) {
     return (
-      state.port === options.port &&
-      state.localHost === options.localHost &&
-      state.host === options.host &&
-      state.subdomain === options.subdomain
+      state.port === options.port && state.localHost === options.localHost
     );
+  }
+
+  // Probes the tunnel's well-known DID doc — served by the appview, so a 2xx
+  // confirms both that Cloudflare's edge still has the tunnel registered AND
+  // that the local appview is up and reachable through it. Cloudflare returns
+  // HTTP 530 once the cloudflared agent has unregistered the origin (e.g.
+  // because the previous dev session crashed without disposing the tunnel).
+  static async #isReachable(url: string) {
+    try {
+      const response = await fetch(`${url}/.well-known/did.json`, {
+        method: "GET",
+        signal: AbortSignal.timeout(5000),
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   static #isAlive(pid: number) {
@@ -234,8 +241,6 @@ class TunnelSession {
           url,
           port: options.port,
           localHost: options.localHost,
-          host: options.host,
-          subdomain: options.subdomain,
         } satisfies TunnelState,
         null,
         2,
@@ -250,28 +255,31 @@ class TunnelSession {
     const { stdout, stderr } = tunnel;
 
     if (!stdout || !stderr) {
-      throw new Error("Localtunnel process did not expose stdout/stderr pipes.");
+      throw new Error("cloudflared process did not expose stdout/stderr pipes.");
     }
 
     return new Promise<string>((resolve, reject) => {
       let settled = false;
 
-      onLines(stderr, (line) => {
-        log.warn(line);
-      });
-
-      onLines(stdout, (line) => {
-        const url = line.match(PUBLIC_URL_PATTERN)?.[0];
-        if (url) {
-          settled = true;
-          resolve(url);
-          return;
+      // cloudflared writes its banner (including the public URL) to stderr;
+      // stdout is usually quiet but we surface anything that does appear.
+      const handleLine = (line: string) => {
+        if (!settled) {
+          const url = line.match(PUBLIC_URL_PATTERN)?.[0];
+          if (url) {
+            settled = true;
+            resolve(url);
+            return;
+          }
         }
 
         log.message(line, {
           symbol: "\u2139",
         });
-      });
+      };
+
+      onLines(stderr, handleLine);
+      onLines(stdout, handleLine);
 
       tunnel.once("exit", (code, signal) => {
         this.#clearState(tunnel.pid);
@@ -281,9 +289,11 @@ class TunnelSession {
         }
 
         status.error(
-          `Localtunnel exited before a public URL was detected (${signal ?? code ?? "unknown"}).`,
+          `cloudflared exited before a public URL was detected (${signal ?? code ?? "unknown"}).`,
         );
-        reject(new Error("Localtunnel exited before a public URL was detected."));
+        reject(
+          new Error("cloudflared exited before a public URL was detected."),
+        );
       });
     });
   }
@@ -341,7 +351,7 @@ const program = new Command()
   .name("dev-public")
   .usage("[options]")
   .description(
-    "Make the AppView public with localtunnel, then optionally launch local dev processes.",
+    "Make the AppView public with a Cloudflare quick tunnel, then optionally launch local dev processes.",
   )
   .showHelpAfterError()
   .option(
@@ -366,9 +376,7 @@ const program = new Command()
     "-l, --local-host <host>",
     "Local host for the AppView",
     DEFAULT_LOCAL_HOST,
-  )
-  .option("-h, --host <url>", "Localtunnel server host")
-  .option("-s, --subdomain <name>", "Requested localtunnel subdomain");
+  );
 
 const runTarget = async (
   options: Options,
